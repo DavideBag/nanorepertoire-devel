@@ -1,0 +1,78 @@
+name: getcdr3
+description: Run in-house python script to collect the CDR3 sequences only
+  from the full amino acid sequence, using the context of the CDR3 which
+  begins with amino acids which commence after a YYC and terminates with
+  the amino acids which precede a WGQ. We also compute the length distribution of
+  these CDR3 sequences.
+  Note that this approach is not robust to amino acid sequences which do not follow
+  this pattern, or contain the motifs in other positions.
+keywords:
+  - seqretrieval
+  - translation
+  - genomics
+tools:
+  - getCDR3.py:
+      description: |
+        see above
+params:
+  - out_dir:
+      type: string
+      description: |
+        The pipeline's output directory. By default, the module will
+        output files into `$out_dir/MODULE_NAME`
+  - publish_dir:
+      type: string
+      description: |
+        Specifying this parameters, appends the string to the path for
+        the standard output directory provided by `$out_dir`.
+      default: MODULE_NAME (see out_dir)
+  - publish_dir_mode:
+      type: string
+      description: |
+        Provide a value for the Nextflow `publishDir` mode parameter
+        (e.g. copy, link, ...)
+  - publish_results:
+      type: string
+      description: |
+        Whether or not to publish results into `publish_dir`. Set to `none` to not
+        publish any files at all; to `default` to publish all relevant files.
+      default: set to 'default', i.e. publishes all relevant files.
+
+input:
+  - meta:
+      type: map
+      description: |
+        The value is passed in a tuple, with the reads.
+        This is a groovy map containing sample metadata which is
+        generated in the main script. The following fields are expected
+        by the module:
+  - sampleid:
+      type: string
+      description: Sample identifier
+  - translated:
+      type: path
+      description: |
+        FASTA file of aminoacid sequences as translated by in-house script and
+        clustered by CD-HIT
+output:
+  - fasta:
+      type: tuple
+      description: "Metadata map (meta) together with FASTA seqience file (type: file)"
+      pattern: "*_cdr3.fasta"
+  - hist:
+      type: tuple
+      description: |
+        Metadata map (meta) together with histogram calculated from
+        clusters (type: file)
+      pattern: "*_cdr3.hist"
+  - tsv:
+      type: tuple
+  - histonly:
+  - tsvonly:
+  - metaonly:
+  - version:
+
+authors:
+  - "@DavideBag"
+maintainers:
+  - "@DavideBag"

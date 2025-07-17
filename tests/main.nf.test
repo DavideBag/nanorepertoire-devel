@@ -1,0 +1,18 @@
+nextflow_pipeline {
+
+    name "Test Workflow main.nf"
+    script "../main.nf"
+    tag "pipeline"
+    tag "pipeline small test"
+
+    test("Small test pipeline") {
+
+        config "../conf/test.config"
+
+        then {
+            assert workflow.success
+        }
+
+    }
+
+}

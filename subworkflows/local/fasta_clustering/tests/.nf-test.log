@@ -1,0 +1,58 @@
+Oct-16 11:32:25.005 [main] INFO  com.askimed.nf.test.App - nf-test 0.8.4
+Oct-16 11:32:25.013 [main] INFO  com.askimed.nf.test.App - Arguments: [test, /Users/bagordo/Desktop/CODE/nanorepertoire-devel/subworkflows/local/fasta_clustering/tests/main.nf.test, --profile, docker, --update-snapshot]
+Oct-16 11:32:25.495 [main] INFO  com.askimed.nf.test.App - Nextflow Version: 24.04.4
+Oct-16 11:32:25.497 [main] WARN  com.askimed.nf.test.commands.RunTestsCommand - No nf-test config file found.
+Oct-16 11:32:25.497 [main] INFO  com.askimed.nf.test.commands.RunTestsCommand - Detected 1 test files.
+Oct-16 11:32:25.753 [main] WARN  com.askimed.nf.test.config.FileStaging - File '/Users/bagordo/Desktop/CODE/nanorepertoire-devel/subworkflows/local/fasta_clustering/tests/bin' not found. Ignore it.
+Oct-16 11:32:25.753 [main] WARN  com.askimed.nf.test.config.FileStaging - File '/Users/bagordo/Desktop/CODE/nanorepertoire-devel/subworkflows/local/fasta_clustering/tests/lib' not found. Ignore it.
+Oct-16 11:32:25.753 [main] WARN  com.askimed.nf.test.config.FileStaging - File '/Users/bagordo/Desktop/CODE/nanorepertoire-devel/subworkflows/local/fasta_clustering/tests/assets' not found. Ignore it.
+Oct-16 11:32:25.755 [main] INFO  com.askimed.nf.test.core.TestExecutionEngine - Started test plan
+Oct-16 11:32:25.755 [main] INFO  com.askimed.nf.test.core.TestExecutionEngine - Running testsuite 'Test Subworkflow FASTA_CLUSTERING' from file '/Users/bagordo/Desktop/CODE/nanorepertoire-devel/subworkflows/local/fasta_clustering/tests/main.nf.test'.
+Oct-16 11:32:25.755 [main] INFO  com.askimed.nf.test.core.TestExecutionEngine - Run test 'c18cd727: clustering-reading-cdr3'. type: com.askimed.nf.test.lang.workflow.WorkflowTest
+Oct-16 11:32:32.851 [main] DEBUG com.askimed.nf.test.lang.extensions.SnapshotFile - Load snapshots from file '/Users/bagordo/Desktop/CODE/nanorepertoire-devel/subworkflows/local/fasta_clustering/tests/main.nf.test.snap'
+Oct-16 11:32:32.867 [main] DEBUG com.askimed.nf.test.lang.extensions.Snapshot - Snapshots 'clustering-reading-cdr3' do not match. Update snapshots flag set.
+Oct-16 11:32:32.867 [main] DEBUG com.askimed.nf.test.lang.extensions.SnapshotFile - Updated snapshot 'clustering-reading-cdr3'
+Oct-16 11:32:32.873 [main] DEBUG com.askimed.nf.test.lang.extensions.SnapshotFile - Wrote snapshots to file '/Users/bagordo/Desktop/CODE/nanorepertoire-devel/subworkflows/local/fasta_clustering/tests/main.nf.test.snap'
+Oct-16 11:32:32.873 [main] INFO  com.askimed.nf.test.core.TestExecutionEngine - Test 'c18cd727: clustering-reading-cdr3' finished. status: FAILED
+org.codehaus.groovy.runtime.powerassert.PowerAssertionError: 1 of 2 assertions failed
+	at com.askimed.nf.test.lang.extensions.GlobalMethods.assertAll(GlobalMethods.java:48)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.codehaus.groovy.reflection.CachedMethod.invoke(CachedMethod.java:107)
+	at groovy.lang.MetaMethod.doMethodInvoke(MetaMethod.java:323)
+	at org.codehaus.groovy.runtime.callsite.StaticMetaMethodSite.invoke(StaticMetaMethodSite.java:44)
+	at org.codehaus.groovy.runtime.callsite.StaticMetaMethodSite.callStatic(StaticMetaMethodSite.java:100)
+	at org.codehaus.groovy.runtime.callsite.CallSiteArray.defaultCallStatic(CallSiteArray.java:55)
+	at org.codehaus.groovy.runtime.callsite.AbstractCallSite.callStatic(AbstractCallSite.java:217)
+	at org.codehaus.groovy.runtime.callsite.AbstractCallSite.callStatic(AbstractCallSite.java:240)
+	at main_nf$_run_closure1$_closure2$_closure4.doCall(main.nf.test:32)
+	at main_nf$_run_closure1$_closure2$_closure4.doCall(main.nf.test)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.codehaus.groovy.reflection.CachedMethod.invoke(CachedMethod.java:107)
+	at groovy.lang.MetaMethod.doMethodInvoke(MetaMethod.java:323)
+	at org.codehaus.groovy.runtime.metaclass.ClosureMetaClass.invokeMethod(ClosureMetaClass.java:274)
+	at groovy.lang.MetaClassImpl.invokeMethod(MetaClassImpl.java:1030)
+	at groovy.lang.Closure.call(Closure.java:427)
+	at groovy.lang.Closure.call(Closure.java:406)
+	at com.askimed.nf.test.lang.TestCode.execute(TestCode.java:16)
+	at com.askimed.nf.test.lang.workflow.WorkflowTest.execute(WorkflowTest.java:176)
+	at com.askimed.nf.test.core.TestExecutionEngine.execute(TestExecutionEngine.java:214)
+	at com.askimed.nf.test.commands.RunTestsCommand.execute(RunTestsCommand.java:184)
+	at com.askimed.nf.test.commands.AbstractCommand.call(AbstractCommand.java:43)
+	at com.askimed.nf.test.commands.AbstractCommand.call(AbstractCommand.java:18)
+	at picocli.CommandLine.executeUserObject(CommandLine.java:1953)
+	at picocli.CommandLine.access$1300(CommandLine.java:145)
+	at picocli.CommandLine$RunLast.executeUserObjectOfLastSubcommandWithSameParent(CommandLine.java:2352)
+	at picocli.CommandLine$RunLast.handle(CommandLine.java:2346)
+	at picocli.CommandLine$RunLast.handle(CommandLine.java:2311)
+	at picocli.CommandLine$AbstractParseResultHandler.execute(CommandLine.java:2179)
+	at picocli.CommandLine.execute(CommandLine.java:2078)
+	at com.askimed.nf.test.App.run(App.java:44)
+	at com.askimed.nf.test.App.main(App.java:51)
+Oct-16 11:32:32.875 [main] INFO  com.askimed.nf.test.core.TestExecutionEngine - Testsuite 'Test Subworkflow FASTA_CLUSTERING' finished. snapshot file: true, skipped tests: false, failed tests: true
+Oct-16 11:32:32.878 [main] INFO  com.askimed.nf.test.core.TestExecutionEngine - Executed 1 tests. 1 tests failed. Done!

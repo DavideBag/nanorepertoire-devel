@@ -1,0 +1,37 @@
+{
+    "rename-single_end": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test1",
+                            "single_end": false
+                        },
+                        "test1_renamed.fastq.gz:md5,a881ed33b497636ecbb791513dc99055"
+                    ]
+                ],
+                "1": [
+                    "versions.yml:md5,9624dbd934ca2f37588004000eda5cc7"
+                ],
+                "renamed": [
+                    [
+                        {
+                            "id": "test1",
+                            "single_end": false
+                        },
+                        "test1_renamed.fastq.gz:md5,a881ed33b497636ecbb791513dc99055"
+                    ]
+                ],
+                "versions": [
+                    "versions.yml:md5,9624dbd934ca2f37588004000eda5cc7"
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.8.4",
+            "nextflow": "24.04.3"
+        },
+        "timestamp": "2024-07-15T10:47:23.664611"
+    }
+}

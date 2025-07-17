@@ -1,5 +1,5 @@
 {
-    "$schema": "http://json-schema.org/draft-07/schema",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "https://raw.githubusercontent.com/nf-core/nanorepertoire/master/assets/schema_input.json",
     "title": "nf-core/nanorepertoire pipeline - params.input schema",
     "description": "Schema for the file provided with params.input",
@@ -26,6 +26,24 @@
                 "exists": true,
                 "pattern": "^\\S+\\.f(ast)?q\\.gz$",
                 "errorMessage": "FastQ file for reads 2 cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'"
+            },
+            "individual": {
+                "type": "string",
+                "pattern": "^\\S+$",
+                "errorMessage": "boost field contains the boost round of the immunisation",
+                "meta": ["individualID"]
+            },
+            "boost": {
+                "type": "integer",
+                "pattern": "^\\S+$",
+                "errorMessage": "boost field contains the boost round of the immunisation",
+                "meta": ["boost"]
+            },
+            "immunisation": {
+                "type": "string",
+                "pattern": "^\\S+$",
+                "errorMessage": "boost field contains the boost round of the immunisation",
+                "meta": ["immunisation"]
             }
         },
         "required": ["sample", "fastq_1"]

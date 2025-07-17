@@ -1,0 +1,51 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/modules/meta-schema.json
+name: "rename"
+description: renaming merged file
+keywords:
+  - sort
+  - rename
+  - genomics
+tools:
+  - "rename":
+      description: "The FASTX-Toolkit is a collection of command line tools for Short-Reads FASTA/FASTQ files preprocessing."
+      homepage: "http://hannonlab.cshl.edu/fastx_toolkit/"
+      documentation: "http://hannonlab.cshl.edu/fastx_toolkit/"
+      tool_dev_url: "http://hannonlab.cshl.edu/fastx_toolkit/"
+      licence: ["MIT"]
+
+input:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. `[ id:'sample1', single_end:false ]`
+  - reads:
+      type: file
+      description: Reads file in FASTQ format
+      pattern: "*.{fastq,fq}"
+  - single_end:
+      type: boolean
+      description: Single-end reads
+      pattern: "*.{fastq,fq}"
+
+output:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. `[ id:'sample1', single_end:false ]`
+
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+  - renamed:
+      type: file
+      description: Renamed reads file
+      pattern: "*.{fastq,fq}"
+
+authors:
+  - "@davidebag"
+maintainers:
+  - "@davidebag"

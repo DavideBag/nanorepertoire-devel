@@ -1,0 +1,2 @@
+subworkflows/nanoreport:
+  - subworkflows/nf-core/nanoreport/**

@@ -1,0 +1,21 @@
+name: report
+
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+  - r
+
+dependencies:
+  - bioconda::bioconductor-biostrings=2.52.0
+  - bioconda::bioconductor-genomicfeatures=1.36.0
+  - bioconda::bioconductor-gviz=1.28.0
+  - bioconda::bioconductor-rtracklayer=1.44.2
+  - bioconda::bioconductor-variantannotation=1.30.0
+  - conda-forge::pandoc=2.9.2.1
+  - conda-forge::r-ape=5.4
+  - r::r-knitr
+  - r::r-quarto
+  - r::r-tidyverse
+  - r::r-tidyverse
+  - r::r=3.6.0

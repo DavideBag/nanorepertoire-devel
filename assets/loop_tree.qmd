@@ -1,0 +1,12 @@
+---
+title: ind
+format: html
+editor:
+  chunk_output_type: console
+---
+
+### Evolution tree across boosts for `ind`
+
+```{r}
+print(treePlotList[[ind]])
+```

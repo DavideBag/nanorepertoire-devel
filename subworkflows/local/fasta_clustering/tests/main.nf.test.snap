@@ -1,0 +1,254 @@
+{
+    "translate-clustering-reading-cdr3": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.fasta:md5,1695c2cacd09c498be614659a0886b37"
+                    ]
+                ],
+                "1": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test_clusters.summary:md5,e79147ef0b91e56c0dbd206f4d45c88f"
+                    ]
+                ],
+                "2": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test_cdr3.tsv:md5,89ac4696390cab43ed2d1e5a62d4dac8"
+                    ]
+                ],
+                "3": [
+                    {
+                        "id": "test"
+                    }
+                ],
+                "4": [
+                    "versions.yml:md5,2684ad5f43bf2afaf33fdbd1a001666c",
+                    "versions.yml:md5,6573a2b7a84b9b1ccf5c0717ff0ba77c",
+                    "versions.yml:md5,9247df97c268cf5278db5e0301fab030"
+                ],
+                "cdrmeta": [
+                    {
+                        "id": "test"
+                    }
+                ],
+                "cdrpredicted": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test_cdr3.tsv:md5,89ac4696390cab43ed2d1e5a62d4dac8"
+                    ]
+                ],
+                "cluster": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.fasta:md5,1695c2cacd09c498be614659a0886b37"
+                    ]
+                ],
+                "clusteread": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test_clusters.summary:md5,e79147ef0b91e56c0dbd206f4d45c88f"
+                    ]
+                ],
+                "versions": [
+                    "versions.yml:md5,2684ad5f43bf2afaf33fdbd1a001666c",
+                    "versions.yml:md5,6573a2b7a84b9b1ccf5c0717ff0ba77c",
+                    "versions.yml:md5,9247df97c268cf5278db5e0301fab030"
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.8.4",
+            "nextflow": "24.04.4"
+        },
+        "timestamp": "2024-09-11T15:42:53.628256"
+    },
+    "clustering-reading-cdr3": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.fasta:md5,1695c2cacd09c498be614659a0886b37"
+                    ]
+                ],
+                "1": [
+                    "test_clusters.summary:md5,e79147ef0b91e56c0dbd206f4d45c88f"
+                ],
+                "2": [
+                    [
+                        "test",
+                        [
+                            [
+                                "execution_trace_2024-10-18_11-24-55.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_11-25-52.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_11-26-44.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_11-30-02.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_11-30-23.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_11-34-24.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_11-39-05.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_11-40-00.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_11-40-17.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_11-46-50.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_11-47-49.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_11-48-39.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_11-49-17.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_11-54-26.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_12-37-30.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_16-06-56.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_16-14-34.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_16-18-09.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_16-19-28.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_16-20-52.txt:md5,8ad4a81ac400f067841cbfb3f18e6889"
+                            ]
+                        ],
+                        [
+                            [
+                                "execution_trace_2024-10-18_11-24-55.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_11-25-52.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_11-26-44.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_11-30-02.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_11-30-23.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_11-34-24.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_11-39-05.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_11-40-00.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_11-40-17.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_11-46-50.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_11-47-49.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_11-48-39.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_11-49-17.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_11-54-26.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_12-37-30.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_16-06-56.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_16-14-34.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_16-18-09.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_16-19-28.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_16-20-52.txt:md5,8ad4a81ac400f067841cbfb3f18e6889"
+                            ]
+                        ],
+                        "test_cdr3.fasta:md5,5f0ad57d6ac3c3923ad35aa4ad4033c0"
+                    ]
+                ],
+                "3": [
+                    "test_cdr3.tsv:md5,89ac4696390cab43ed2d1e5a62d4dac8"
+                ],
+                "4": [
+                    "test_cdr3.hist:md5,4e99a92c87ac3be1e7d61bc5804b1c36"
+                ],
+                "5": [
+                    {
+                        "id": "test"
+                    }
+                ],
+                "6": [
+                    "versions.yml:md5,3c42fbfc37c2da9cfc0f08d1100daf58",
+                    "versions.yml:md5,478cbc392823d330428ee3d7b3c8b814",
+                    "versions.yml:md5,9113bedeb10f5a5bc90e86f437ccdbf8"
+                ],
+                "cdrhistograms": [
+                    "test_cdr3.hist:md5,4e99a92c87ac3be1e7d61bc5804b1c36"
+                ],
+                "cdrmeta": [
+                    {
+                        "id": "test"
+                    }
+                ],
+                "cdrpredicted": [
+                    [
+                        "test",
+                        [
+                            [
+                                "execution_trace_2024-10-18_11-24-55.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_11-25-52.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_11-26-44.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_11-30-02.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_11-30-23.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_11-34-24.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_11-39-05.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_11-40-00.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_11-40-17.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_11-46-50.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_11-47-49.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_11-48-39.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_11-49-17.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_11-54-26.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_12-37-30.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_16-06-56.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_16-14-34.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_16-18-09.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_16-19-28.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_16-20-52.txt:md5,8ad4a81ac400f067841cbfb3f18e6889"
+                            ]
+                        ],
+                        [
+                            [
+                                "execution_trace_2024-10-18_11-24-55.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_11-25-52.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_11-26-44.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_11-30-02.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_11-30-23.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_11-34-24.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_11-39-05.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_11-40-00.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_11-40-17.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_11-46-50.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_11-47-49.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_11-48-39.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_11-49-17.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_11-54-26.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_12-37-30.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_16-06-56.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_16-14-34.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_16-18-09.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_16-19-28.txt:md5,8ad4a81ac400f067841cbfb3f18e6889",
+                                "execution_trace_2024-10-18_16-20-52.txt:md5,8ad4a81ac400f067841cbfb3f18e6889"
+                            ]
+                        ],
+                        "test_cdr3.fasta:md5,5f0ad57d6ac3c3923ad35aa4ad4033c0"
+                    ]
+                ],
+                "cdrtsv": [
+                    "test_cdr3.tsv:md5,89ac4696390cab43ed2d1e5a62d4dac8"
+                ],
+                "cluster": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.fasta:md5,1695c2cacd09c498be614659a0886b37"
+                    ]
+                ],
+                "clusteread": [
+                    "test_clusters.summary:md5,e79147ef0b91e56c0dbd206f4d45c88f"
+                ],
+                "versions": [
+                    "versions.yml:md5,3c42fbfc37c2da9cfc0f08d1100daf58",
+                    "versions.yml:md5,478cbc392823d330428ee3d7b3c8b814",
+                    "versions.yml:md5,9113bedeb10f5a5bc90e86f437ccdbf8"
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.8.4",
+            "nextflow": "24.10.0"
+        },
+        "timestamp": "2024-11-08T11:14:02.605268"
+    }
+}

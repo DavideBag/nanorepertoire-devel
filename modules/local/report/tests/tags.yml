@@ -1,0 +1,2 @@
+report:
+  - "modules/nf-core/report/**"

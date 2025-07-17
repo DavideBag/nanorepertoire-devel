@@ -1,0 +1,2 @@
+readcdhit:
+  - "modules/nf-core/readcdhit/**"

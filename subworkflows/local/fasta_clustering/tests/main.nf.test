@@ -1,0 +1,39 @@
+// nf-core subworkflows test fasta_clustering
+nextflow_workflow {
+
+    name "Test Subworkflow FASTA_CLUSTERING"
+    script "../main.nf"
+    workflow "FASTA_CLUSTERING"
+    config "./nextflow.config"
+    tag "subworkflows"
+    tag "subworkflows_nfcore"
+    tag "subworkflows/fasta_clustering"
+    tag "cdhit"
+    tag "readcdhit"
+    tag "getcdr4"
+    tag "mafft"
+
+
+    test("clustering-reading-cdr3") {
+
+        when {
+            workflow {
+                """
+                // input_ch
+                input[0] = [
+                    [id:'test'],
+                    file("https://raw.githubusercontent.com/lescailab/testdata/master/nanobodies/test01_aa.fasta", checkIfExists: true)
+                ]
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert workflow.success},
+                { assert snapshot(workflow.out).match()}
+                //TODO nf-core: Add all required assertions to verify the test output.
+            )
+        }
+    }
+}

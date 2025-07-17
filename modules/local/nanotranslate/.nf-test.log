@@ -1,0 +1,58 @@
+Jul-10 16:20:42.393 [main] INFO  com.askimed.nf.test.App - nf-test 0.8.4
+Jul-10 16:20:42.400 [main] INFO  com.askimed.nf.test.App - Arguments: [test, /Users/bagordo/My Drive/PIPELINES/nanorepertoire-devel/subworkflows/nf-core/fastq_prepare_reads/tests/main.nf.test, --profile, docker, --update-snapshot]
+Jul-10 16:20:42.857 [main] INFO  com.askimed.nf.test.App - Nextflow Version: 24.04.3
+Jul-10 16:20:42.859 [main] WARN  com.askimed.nf.test.commands.RunTestsCommand - No nf-test config file found.
+Jul-10 16:20:42.859 [main] INFO  com.askimed.nf.test.commands.RunTestsCommand - Detected 1 test files.
+Jul-10 16:20:43.111 [main] WARN  com.askimed.nf.test.config.FileStaging - File '/Users/bagordo/My Drive/PIPELINES/nanorepertoire-devel/modules/local/nanotranslate/bin' not found. Ignore it.
+Jul-10 16:20:43.111 [main] WARN  com.askimed.nf.test.config.FileStaging - File '/Users/bagordo/My Drive/PIPELINES/nanorepertoire-devel/modules/local/nanotranslate/lib' not found. Ignore it.
+Jul-10 16:20:43.111 [main] WARN  com.askimed.nf.test.config.FileStaging - File '/Users/bagordo/My Drive/PIPELINES/nanorepertoire-devel/modules/local/nanotranslate/assets' not found. Ignore it.
+Jul-10 16:20:43.114 [main] INFO  com.askimed.nf.test.core.TestExecutionEngine - Started test plan
+Jul-10 16:20:43.114 [main] INFO  com.askimed.nf.test.core.TestExecutionEngine - Running testsuite 'Test Subworkflow FASTQ_PREPARE_READS' from file '/Users/bagordo/My Drive/PIPELINES/nanorepertoire-devel/subworkflows/nf-core/fastq_prepare_reads/tests/main.nf.test'.
+Jul-10 16:20:43.114 [main] INFO  com.askimed.nf.test.core.TestExecutionEngine - Run test '9eb2deb0: preprocessing - fastqc - both_end'. type: com.askimed.nf.test.lang.workflow.WorkflowTest
+Jul-10 16:20:48.486 [main] DEBUG com.askimed.nf.test.lang.extensions.SnapshotFile - Load snapshots from file '/Users/bagordo/My Drive/PIPELINES/nanorepertoire-devel/subworkflows/nf-core/fastq_prepare_reads/tests/main.nf.test.snap'
+Jul-10 16:20:48.824 [main] DEBUG com.askimed.nf.test.lang.extensions.Snapshot - Snapshots 'preprocessing - fastqc - both_end' do not match. Update snapshots flag set.
+Jul-10 16:20:48.824 [main] DEBUG com.askimed.nf.test.lang.extensions.SnapshotFile - Updated snapshot 'preprocessing - fastqc - both_end'
+Jul-10 16:20:49.282 [main] DEBUG com.askimed.nf.test.lang.extensions.SnapshotFile - Wrote snapshots to file '/Users/bagordo/My Drive/PIPELINES/nanorepertoire-devel/subworkflows/nf-core/fastq_prepare_reads/tests/main.nf.test.snap'
+Jul-10 16:20:49.283 [main] INFO  com.askimed.nf.test.core.TestExecutionEngine - Test '9eb2deb0: preprocessing - fastqc - both_end' finished. status: FAILED
+org.codehaus.groovy.runtime.powerassert.PowerAssertionError: 1 of 2 assertions failed
+	at com.askimed.nf.test.lang.extensions.GlobalMethods.assertAll(GlobalMethods.java:48)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.codehaus.groovy.reflection.CachedMethod.invoke(CachedMethod.java:107)
+	at groovy.lang.MetaMethod.doMethodInvoke(MetaMethod.java:323)
+	at org.codehaus.groovy.runtime.callsite.StaticMetaMethodSite.invoke(StaticMetaMethodSite.java:44)
+	at org.codehaus.groovy.runtime.callsite.StaticMetaMethodSite.callStatic(StaticMetaMethodSite.java:100)
+	at org.codehaus.groovy.runtime.callsite.CallSiteArray.defaultCallStatic(CallSiteArray.java:55)
+	at org.codehaus.groovy.runtime.callsite.AbstractCallSite.callStatic(AbstractCallSite.java:217)
+	at org.codehaus.groovy.runtime.callsite.AbstractCallSite.callStatic(AbstractCallSite.java:240)
+	at main_nf$_run_closure1$_closure2$_closure4.doCall(main.nf.test:43)
+	at main_nf$_run_closure1$_closure2$_closure4.doCall(main.nf.test)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.codehaus.groovy.reflection.CachedMethod.invoke(CachedMethod.java:107)
+	at groovy.lang.MetaMethod.doMethodInvoke(MetaMethod.java:323)
+	at org.codehaus.groovy.runtime.metaclass.ClosureMetaClass.invokeMethod(ClosureMetaClass.java:274)
+	at groovy.lang.MetaClassImpl.invokeMethod(MetaClassImpl.java:1030)
+	at groovy.lang.Closure.call(Closure.java:427)
+	at groovy.lang.Closure.call(Closure.java:406)
+	at com.askimed.nf.test.lang.TestCode.execute(TestCode.java:16)
+	at com.askimed.nf.test.lang.workflow.WorkflowTest.execute(WorkflowTest.java:176)
+	at com.askimed.nf.test.core.TestExecutionEngine.execute(TestExecutionEngine.java:214)
+	at com.askimed.nf.test.commands.RunTestsCommand.execute(RunTestsCommand.java:184)
+	at com.askimed.nf.test.commands.AbstractCommand.call(AbstractCommand.java:43)
+	at com.askimed.nf.test.commands.AbstractCommand.call(AbstractCommand.java:18)
+	at picocli.CommandLine.executeUserObject(CommandLine.java:1953)
+	at picocli.CommandLine.access$1300(CommandLine.java:145)
+	at picocli.CommandLine$RunLast.executeUserObjectOfLastSubcommandWithSameParent(CommandLine.java:2352)
+	at picocli.CommandLine$RunLast.handle(CommandLine.java:2346)
+	at picocli.CommandLine$RunLast.handle(CommandLine.java:2311)
+	at picocli.CommandLine$AbstractParseResultHandler.execute(CommandLine.java:2179)
+	at picocli.CommandLine.execute(CommandLine.java:2078)
+	at com.askimed.nf.test.App.run(App.java:44)
+	at com.askimed.nf.test.App.main(App.java:51)
+Jul-10 16:20:49.285 [main] INFO  com.askimed.nf.test.core.TestExecutionEngine - Testsuite 'Test Subworkflow FASTQ_PREPARE_READS' finished. snapshot file: true, skipped tests: false, failed tests: true
+Jul-10 16:20:49.287 [main] INFO  com.askimed.nf.test.core.TestExecutionEngine - Executed 1 tests. 1 tests failed. Done!

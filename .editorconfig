@@ -31,3 +31,11 @@ indent_size = unset
 # ignore python and markdown
 [*.{py,md}]
 indent_style = unset
+
+# ignore config
+[nextflow.config]
+indent_style = unset
+
+# ignore qmd
+[*.qmd]
+indent_style = unset

@@ -1,0 +1,56 @@
+// nf-core subworkflows test nanoreport
+nextflow_workflow {
+
+    name "Test Subworkflow NANOREPORT"
+    script "../main.nf"
+    workflow "NANOREPORT"
+
+    tag "subworkflows"
+    tag "subworkflows_nfcore"
+    tag "subworkflows/nanoreport"
+    tag "samtools"
+    tag "samtools/sort"
+    tag "samtools/index"
+
+
+    test("sarscov2 - bam - single_end") {
+
+        when {
+            workflow {
+                """
+                input[0] =[
+                        file("https://raw.githubusercontent.com/DavideBag/testdata/dev/nanobodies/report/nftest_1_fastqc.zip", checkIfExists: true)
+                        ]
+                input[1] = [
+                        file("https://raw.githubusercontent.com/DavideBag/testdata/dev/nanobodies/report/nftest.cutadapt.log", checkIfExists: true)
+                        ]
+                input[2] = [
+                        file("$projectDir/assets/analysis_report.qmd")
+                        ]
+                input[3] = [
+                        file("$projectDir/assets/loop_tree.qmd")
+                        ]
+                input[4] = [
+                        file('https://raw.githubusercontent.com/DavideBag/testdata/dev/nanobodies/report/test_clusters.summary', checkIfExists: true)
+                        ]
+                input[5] = [
+                        file('https://raw.githubusercontent.com/DavideBag/testdata/dev/nanobodies/report/test_cdr3.hist', checkIfExists: true)
+                        ]
+                input[6] = [
+                        file('https://raw.githubusercontent.com/DavideBag/testdata/dev/nanobodies/report/test_cdr3.tsv', checkIfExists: true)
+                        ]
+                input[7] = [
+                    [id: 'test', sampleID: 'sample1', individualID: 'ind1', immunisation: 'imm1', boost: 'boost1']
+                        ]
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert workflow.success},
+                { assert snapshot(workflow.out).match()}
+            )
+        }
+    }
+}

@@ -1,0 +1,393 @@
+---
+title: "Nanobodies Sequencing Analysis"
+author:
+  - name: "Francesco Lescai"
+    affiliation: "Università di Pavia"
+    email: "francesco.lescai@unipv.it"
+  - name: "Davide Bagordo"
+    affiliation: "Università di Pavia"
+    email: "davide.bagordo@unipv.it"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+format:
+  html:
+    theme: default
+    toc: true
+editor:
+  options:
+    chunk-output-type: console
+params:
+  clusterList: null
+  histoList: null
+  tableList: null
+  sampleData: null
+  sizeThreshold: null
+  loopFile: null
+  calcTree: null
+---
+
+
+```{r}
+#| label: library installation
+#| include: false
+
+# Carica le librerie necessarie per l'analisi e imposta le opzioni di knitr per il rendering dei chunk di codice.
+library(knitr)
+library(ggplot2)
+library(tidyverse)
+library(kableExtra)
+library(ggtree)
+library(Biostrings)
+library(msa)
+library(plotly)
+library(seqinr)
+library(ape)
+
+opts_chunk$set(
+    message = FALSE,
+    error = FALSE,
+    warning = FALSE,
+    tidy = TRUE,
+    tidy.opts = list(blank = FALSE),
+    cache = TRUE,
+    cache.lazy = FALSE,
+    echo = FALSE,
+    results = "asis",
+    fig.pos = "H",
+    fig.wide = TRUE
+)
+```
+
+```{r }
+#| label: Data Preparation
+
+# Questa sezione legge i parametri passati al documento, tra cui le liste di file di cluster, istogrammi e tabelle, oltre ai dati campione e altri parametri di configurazione.
+
+clusterfiles <- unlist(strsplit(params$clusterList, ","))
+histofiles <- unlist(strsplit(params$histoList, ","))
+tablefiles <- unlist(strsplit(params$tableList, ","))
+sampleMetaData <- read_tsv(params$sampleData)
+sizeThreshold <- unlist(params$sizeThreshold)
+loopFile <- unlist(params$loopFile)
+dotree <- ifelse(unlist(params$calcTree) == "true", TRUE, FALSE)
+```
+
+# Introduction
+
+In this analysis, we aim to generate the total number of different nanobody CDR3s that exist in a library, and the relative abundance of each. We then perform further analysis to show which B cell lineages were affinity matured. For our initial analysis we follow some of the steps used by Deschaght et al (2017).
+
+# Results
+
+In the first section, we briefly summarise the characteristics of the clusters. In the second one, we look more in detail at the CDR3 in the libraries.
+
+## Clusters
+
+In the following, we review the distribution of members of clusters and their sequence identity to the representative.
+
+```{r}
+#| label: ClusterMembership
+
+# Legge i dati di cluster da ciascun file nella lista e li combina in un unico dataframe.
+
+clusterbig <- data.frame()
+for (file in clusterfiles) {
+    samplename <- gsub("_clusters.summary", "", file)
+    writeLines(paste0("-------> received sample name as = ", samplename))
+    clusterdata <- read_csv(file)
+    head(clusterdata)
+    clusterdata$Sample <- samplename
+    clusterbig <- rbind(clusterbig, clusterdata)
+    rm(clusterdata)
+}
+```
+
+```{r}
+#| label: ClusterSizePlot
+
+# Genera un istogramma delle dimensioni dei cluster.
+
+ggplot(data = clusterbig) +
+    geom_histogram(aes(x = Count)) +
+    scale_x_continuous(limits = c(0, 500)) +
+    scale_y_continuous(limits = c(0, 5000)) +
+    xlab("Number of Cluster Members") +
+    ggtitle("Cluster Sizes") +
+    facet_wrap(~Sample)
+```
+
+```{r}
+#| label: clusterMembersPlot
+
+# Genera un grafico a dispersione che mostra l'identità della sequenza rispetto al rappresentante del cluster.
+
+ggplot(data = clusterbig) +
+    geom_point(aes(x = Count, y = Identity), position = "jitter") +
+    xlab("Number of Cluster Members") +
+    ylab("Average Sequence Identity\nto Cluster Representative") +
+    facet_wrap(~Sample)
+```
+
+We summarise cluster counts based on the number of member sequences.
+
+```{r}
+#| label: clustercountsTable
+
+# Crea una tabella che riassume il numero di cluster in base alla dimensione del cluster.
+
+clusterbig$five <- clusterbig$Count >= 5
+clusterbig$hundred <- clusterbig$Count >= 100
+clusterbig$thousand <- clusterbig$Count >= 1000
+
+clustercounts <- clusterbig %>%
+    group_by(Sample) %>%
+    summarize(
+        Clusters = n(),
+        Clusters_of_5 = sum(five),
+        Clusters_of_100 = sum(hundred),
+        Clusters_of_1000 = sum(thousand)
+    )
+
+kable(clustercounts) %>%
+    kable_styling()
+
+clusterbig$five <- clusterbig$Count >= 5
+clusterbig$hundred <- clusterbig$Count >= 100
+clusterbig$thousand <- clusterbig$Count >= 1000
+
+clustercounts <- clusterbig %>%
+    group_by(Sample) %>%
+    summarize(
+        Clusters = n(),
+        Clusters_of_5 = sum(five),
+        Clusters_of_100 = sum(hundred),
+        Clusters_of_1000 = sum(thousand)
+    )
+
+kable(clustercounts) %>%
+    kable_styling()
+```
+
+## CDR3 analysis
+
+We have used a Python script to collect the CDR3 sequences only from the full amino acid sequence, using the context of the CDR3 which begins with amino acids which commence after a YYC and terminates with the amino acids which precede a WGQ. We also compute the length distribution of these CDR3 sequences.
+
+Note that this approach is not robust to amino acid sequences which do not follow this pattern, or contain the motifs in other positions.
+
+```{r }
+#| label: cdrhistogram
+
+# Legge i dati degli istogrammi CDR3 da ciascun file e li combina in un unico dataframe.
+
+cdrhists <- data.frame()
+for (file in histofiles) {
+    samplename <- gsub("_cdr3.hist", "", file)
+    histdata <- read.csv(file, header = TRUE)
+    histdata$Sample <- rep(samplename, times = nrow(histdata))
+    cdrhists <- rbind(cdrhists, histdata)
+}
+```
+
+```{r}
+#| label: CDR3countsTable
+
+# Crea una tabella che riassume il numero di CDR3 unici per campione.
+
+cdrcounts <- cdrhists %>%
+    group_by(Sample) %>%
+    summarize(Unique_CDR3s = sum(Count0))
+
+kable(cdrcounts) %>%
+    kable_styling()
+```
+
+```{r}
+#| label: CDR3sizeplot
+
+# Genera un istogramma della distribuzione delle dimensioni delle sequenze CDR3 uniche.
+
+ggplot(data = cdrhists) +
+    geom_histogram(aes(x = Size, y = Count0), stat = "identity") +
+    facet_wrap(~Sample) +
+    ggtitle("Size Distribution of Unique CDR3s")
+```
+
+## Evolution of CDR3
+
+To be completed. Currently, only outputting a table file.
+
+```{r }
+#| label: fastaRep
+
+# Legge i dati delle sequenze fasta da ciascun file e li combina in un unico dataframe.
+
+fastaSeq <- data.frame()
+for (fasta in tablefiles) {
+    sample <- gsub("_cdr3.tsv", "", fasta)
+    seqs <- read_tsv(fasta)
+    fastaSeq <- rbind(
+        fastaSeq,
+        cbind(seqs,
+            sample = sample
+        )
+    )
+    rm(seqs)
+}
+```
+
+```{r}
+#| label:  mergeData
+
+# Unisce i dati dei cluster con i dati delle sequenze fasta.
+
+boostEvol <- clusterbig %>%
+    left_join(fastaSeq,
+        by = c(
+            "Representative" = "ID",
+            "Sample" = "sample"
+        )
+    )
+```
+
+temporarily taken from merged dataset, otherwise would be loaded from file.
+
+```{r}
+#| label: sampleMetaData
+
+# Unisce i dati risultanti con i metadati del campione e salva il risultato in un file TSV.
+
+boostEvol <- boostEvol %>%
+    left_join(sampleMetaData,
+        by = c("Sample" = "ID")
+    )
+write_tsv(boostEvol, "cdr3_boost_overview_table.tsv")
+```
+
+```{r}
+#| label: MSAandTreeStore
+
+# Questa sezione esegue l'allineamento multiplo delle sequenze CDR3 e genera un albero filogenetico per ciascun individuo.
+
+individualData <- list()
+treeDataList <- list()
+treeMetaDataList <- list()
+treePlotList <- list()
+
+for (ind in unique(boostEvol$individual)) {
+    tmpData <- boostEvol %>%
+        filter(individual == ind) %>%
+        filter(!is.na(CDR3)) %>%
+        filter(Count > sizeThreshold) %>%
+        group_by(CDR3) %>%
+        summarise(
+            clusterSize = max(Count),
+            representativeSeq = Representative[which(Count == max(Count))],
+            individual = individual[which(Count == max(Count))],
+            sample = Sample[which(Count == max(Count))],
+            immunisation = immunisation[which(Count == max(Count))],
+            boost = boost[which(Count == max(Count))]
+        ) %>%
+        mutate(
+            tip_label = paste0(
+                representativeSeq, "_S", individual, "_I", immunisation, "_B", boost
+            )
+        )
+
+    individualData[[ind]] <- tmpData
+
+    individualCDR3 <- AAStringSet(tmpData$CDR3)
+    names(individualCDR3) <- tmpData$tip_label
+
+    if (length(individualCDR3) == 0) {
+        message(paste("No CDR3 sequences found for individual", ind))
+        next
+    }
+
+    # message("---> multiple alignment")
+    msa <- msa(individualCDR3, method = "ClustalOmega", type = "protein")
+    alignment <- msaConvert(msa, type = "seqinr::alignment")
+
+    # message("---> tree generation")
+    dist <- dist.alignment(alignment)
+    smalltree <- njs(dist) # to allow for missing values in the distance matrix
+
+    # message("---> tree metadata")
+    treeMetaData <- tmpData[c("tip_label", "sample", "individual", "immunisation", "boost")]
+
+    # message("---> store results")
+    treeDataList[[ind]] <- smalltree
+    treeMetaDataList[[ind]] <- treeMetaData
+
+    # message("---> combine metadata in plot")
+    treePlotBase <- ggtree(smalltree, layout = "rectangular") %<+% treeMetaData
+
+    # message("---> generate tree plot")
+    annotatedTree <- treePlotBase +
+        geom_tiplab(align = TRUE, linesize = .2, size = 2, offset = -0.8) +
+        geom_rootpoint(color = "black", size = 3) +
+        geom_tippoint(aes(color = boost), size = 2, alpha = .5)
+
+    treePlotList[[ind]] <- annotatedTree
+}
+
+```
+
+```{r}
+#| label: setOut
+out <- NULL
+```
+
+```{r eval=dotree}
+#| label: run-summary-md
+#| include: false
+
+# Esegue il rendering dei documenti figlio per ciascun individuo, utilizzando i dati dell'evoluzione delle sequenze CDR3.
+
+out <- NULL
+for (ind in unique(boostEvol$individual)) {
+    env <- new.env()
+    out <- c(out, knit_child(loopFile, envir = env))
+}
+
+```
+
+`r paste(out, collapse = '\n')`
+
+```{r}
+#| lablabel: saveImage
+save.image("nanobodies_report.RData")
+```
+
+# Additional QC
+
+To be completed.
+
+```{r}
+#| label: viewlengthdist
+#| eval: false
+for (samplename in c("317-D1-Bst3_S1", "317-D1-Bst4_S2", "317-L1-Bst2_S3", "317-L1-Bst3_S4", "317-L1-Bst4_S5")) {
+    lengthfreqs <- read.csv(file = paste0(samplename, "_L001.hist"), sep = "\t", header = FALSE)
+    colnames(lengthfreqs) <- c("sequence_length", "count")
+    print(ggplot(data = lengthfreqs) +
+        geom_histogram(aes(x = sequence_length, y = count), stat = "identity") +
+        ggtitle(paste0("Distribution of merged sequence lengths for sample ", samplename)))
+}
+```
+
+# Methods
+
+The overall approach is inspired by the work *Large diversity of Functional Nanobodies from a Camelid Immune Library Revealed by an Alternative Analysis of Next-Generation sequencing data* by Pieter Deschaght and colleagues (doi: 10.3389/fimmu.2017.00420, published April 2017).
+
+## Merging forward and reverse reads
+
+Forward and reverse reads have been merged using the software FLASH, with default settings except maximum overlap between the reads, which was set at 300bp. More information about the software is available at their [website](https://ccb.jhu.edu/software/FLASH/)
+
+## Translating cDNA to protein sequence
+
+Translation has been done with an in-house python script developed by T. Bleazard, and using Biopython. In order to identify the correct frame, we have set the starting sequence as *ATGGCACAG* and the end sequence as *ACCGTCTCCTCA*. Anything in between is translated into a protein sequence. If start or end cannot be identified, or if the sequence in between is not a multiple of codon triplets, the sequence will fail translation.
+
+## Clustering the aminoacid sequences
+
+Clustering of the translated sequences is performed using the software CD-HIT. For more information, please visit their [website](https://github.com/weizhongli/cdhit/wiki). In our implementation we have selected an identity cutoff of 0.9, as per results of Deschaght et al.
+
+## Extracting the CDR3 sequences
+
+Using Biopython, and an in-house script originally written by T. Bleazard, we extract the CDR3 sequence from the translated protein sequence. The identification of CDR3 is crucial in this process: at the moment we extract a variable sequence between 3 amminoacids after the motif **T.{2}Y.{1}C** and the motif **.{6}TVSS**. We have chosen these motives based on multiple sequence alignments performed by Mitchel et al. in 2018 ( doi: 10.1002/prot.25497). We will consider more complex extraction algorithms in a future release. Note that - although the motifs we chose are the result of a multiple alignment and peer-reviewed work - this approach might not be robust to amino acid sequences which do not follow this pattern, or contain the motifs in other positions.

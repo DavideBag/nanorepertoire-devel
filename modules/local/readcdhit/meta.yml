@@ -1,0 +1,55 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/modules/meta-schema.json
+name: "readcdhit"
+description: a local tool biopython based to read cdhit output
+keywords:
+  - nanobodies
+  - translation
+  - genomics
+tools:
+  - "biopython":
+      description: "Freely available tools for computational molecular biology."
+      homepage: "https://biopython.org/"
+      documentation: "https://biopython.org/"
+      tool_dev_url: "https://biopython.org/"
+      licence: ["Biopython License Agreement"]
+
+input:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. `[ id:'sample1', single_end:false ]`
+  - clusters:
+      type: file
+      description: CD-HIT output file
+      pattern: "*.{clstr,clstr.gz}"
+  - single_end:
+      type: file
+      description: Single-end reads
+      pattern: "*.{fastq,fq,fastq.gz,fq.gz}"
+
+output:
+  #Only when we have meta
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. `[ id:'sample1', single_end:false ]`
+
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+  - summary:
+      type: file
+      description: Summary of the CD-HIT output
+      pattern: "*.{txt,log}"
+  - summaryonly:
+      type: file
+      description: Summary of the CD-HIT output
+      pattern: "*.{txt,log}"
+authors:
+  - "@davidebag"
+maintainers:
+  - "@davidebag"

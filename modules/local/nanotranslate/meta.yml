@@ -1,0 +1,56 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/modules/meta-schema.json
+name: "nanotranslate"
+description: a local tool biopython based to translate flash output
+keywords:
+  - nanobodies
+  - translation
+  - genomics
+tools:
+  - "nanotranslate":
+      description: "Freely available tools for computational molecular biology."
+      homepage: "https://biopython.org/"
+      documentation: "https://biopython.org/"
+      tool_dev_url: "https://biopython.org/"
+      licence: ["Biopython License Agreement"]
+
+input:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. `[ id:'sample1', single_end:false ]`
+  - mergedfq:
+      type: file
+      description: Sorted BAM/CRAM/SAM file
+      pattern: "*.{fastq,fq}"
+  - single_end:
+      type: file
+      description: Sorted BAM/CRAM/SAM file
+      pattern: "*.{fastq,fq}"
+
+output:
+  #Only when we have meta
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. `[ id:'sample1', single_end:false ]`
+
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+  - fasta:
+      type: file
+      description: fasta aa file
+      pattern: "*.{fasta,fa}"
+  - log:
+      type: file
+      description: log of the run
+      pattern: "*.{log,txt}"
+
+authors:
+  - "@DavideBag"
+maintainers:
+  - "@DavideBag"

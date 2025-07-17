@@ -1,0 +1,2 @@
+getcdr3:
+  - "modules/nf-core/getcdr3/**"

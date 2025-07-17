@@ -1,0 +1,46 @@
+nextflow_process {
+
+    name "Test Process REPORT"
+    script "../main.nf"
+    process "REPORT"
+    config "./nextflow.config"
+    tag "modules"
+    tag "modules_nfcore"
+    tag "report"
+
+    test("reporting") {
+
+        when {
+            process {
+                """
+                // input_ch
+                input[0] = [
+                    file("$projectDir/assets/analysis_report.qmd")
+                ]
+                input[1] = [
+                    file("$projectDir/assets/loop_tree.qmd")
+                ]
+                input[2] = [
+                    file('https://raw.githubusercontent.com/DavideBag/testdata/dev/nanobodies/report/test_clusters.summary', checkIfExists: true)
+                ]
+                input[3] = [
+                    file('https://raw.githubusercontent.com/DavideBag/testdata/dev/nanobodies/report/test_cdr3.hist', checkIfExists: true)
+                ]
+                input[4] = [
+                    file('https://raw.githubusercontent.com/DavideBag/testdata/dev/nanobodies/report/test_cdr3.tsv', checkIfExists: true)
+                ]
+                input[5] = [
+                    [id: 'test', sampleID: 'sample1', individualID: 'ind1', immunisation: 'imm1', boost: 'boost1']
+                ]
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert workflow.success},
+                { assert snapshot(workflow.stdout).match()}
+            )
+        }
+    }
+}

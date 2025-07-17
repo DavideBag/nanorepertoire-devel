@@ -1,0 +1,49 @@
+// nf-core subworkflows test fastq_to_fasta
+nextflow_workflow {
+
+    name "Test Subworkflow FASTQ_TO_FASTA"
+    script "../main.nf"
+    config "./nextflow.config"
+    workflow "FASTQ_TO_FASTA"
+
+    tag "subworkflows"
+    tag "subworkflows_nfcore"
+    tag "subworkflows/fastq_to_fasta"
+    tag "cutadapt"
+    tag "flash"
+    tag "rename"
+    tag "nanotranslate"
+    tag "fastqc"
+
+
+    test("preprocessing - fastqc - fasta") {
+
+        when {
+            workflow {
+                """
+                input[0] = Channel.of(
+                    [
+                        [ id: 'nftest', single_end:false ],
+                        [
+                            file("https://raw.githubusercontent.com/lescailab/testdata/master/nanobodies/test01_raw_R1.fastq.gz", checkIfExists: true),
+                            file("https://raw.githubusercontent.com/lescailab/testdata/master/nanobodies/test01_raw_R2.fastq.gz", checkIfExists: true)
+                        ]
+                    ]
+                )
+                input[1] = Channel.of(
+                    [
+                        file("https://raw.githubusercontent.com/lescailab/testdata/master/nanobodies/adapters.fa", checkIfExists: true)
+                    ]
+                )
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert workflow.success},
+                { assert snapshot(workflow.out).match()}
+            )
+        }
+    }
+}
