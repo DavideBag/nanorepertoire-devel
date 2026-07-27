@@ -3,6 +3,11 @@ import csv, json, math, argparse, sys, os
 from collections import defaultdict, Counter
 from datetime import datetime
 
+# repertoire_metrics.py sits next to this script in the pipeline bin/ directory,
+# which is on PATH but not necessarily on PYTHONPATH.
+sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
+from repertoire_metrics import abundance_metrics
+
 # ─────────────────────────────────────────────────────────────────────────────
 # 0. I/O & ARGUMENT PARSING
 # ─────────────────────────────────────────────────────────────────────────────
@@ -181,22 +186,41 @@ for s, cdr3s in cdr3_by_sample.items():
         aa: (all_aa.count(aa)/total*100 if total > 0 else 0) for aa in AA_ORDER
     }
 
+# Cluster sizes per sample, the input of every clonal abundance metric
+counts_by_sample = defaultdict(list)
+for r in clusterbig:
+    counts_by_sample[r.get("Sample", "Unknown")].append(to_int(r.get("Count", r.get("count", 0))))
+
 # Diversity metrics table
 div_metrics = []
 for r in clustercounts:
     s = r["Sample"]
     n_cdr3 = next((to_int(x["Unique_CDR3s"]) for x in cdrcounts if x["Sample"] == s), 0)
     lens   = [len(c) for c in cdr3_by_sample.get(s, [])]
-    H      = round(shannon(lens), 3)
+    H_len  = round(shannon(lens), 3)
     of5    = to_int(r["Clusters_of_5"])
     total  = to_int(r["Clusters"])
     of1000 = to_int(r["Clusters_of_1000"])
     pct_exp   = round(of5/total*100, 1) if total > 0 else 0
     pct_large = round(of1000/total*100, 2) if total > 0 else 0
-    div_metrics.append({
+    row = {
         "Sample": s, "Unique_CDR3s": n_cdr3, "Total_Clusters": total,
-        "Shannon": H, "Pct_expanded": pct_exp, "Pct_large": pct_large
-    })
+        # Entropy of the CDR3 *length* distribution: a measure of how evenly the
+        # paratope lengths are spread, not of repertoire diversity.
+        "Shannon_len": H_len, "Pct_expanded": pct_exp, "Pct_large": pct_large
+    }
+    # Clonal abundance metrics, computed on the cluster sizes of the sample.
+    row.update(abundance_metrics(counts_by_sample.get(s, [])))
+    row["Total_Clusters"] = total or row["Clusters"]
+    div_metrics.append(row)
+
+def fmt_metric(value, digits=3, suffix=""):
+    """Render a metric, or NA when it is not defined for this sample."""
+    if value is None:
+        return '<span style="color:#95a5a6">NA</span>'
+    if isinstance(value, int):
+        return f"{value:,}{suffix}"
+    return f"{value:.{digits}f}{suffix}"
 
 # CDR3 histogram data per sample
 hist_by_sample = defaultdict(lambda: defaultdict(int))
@@ -370,30 +394,37 @@ fig7_layout = {
 }
 
 # ── Fig 8: Diversity bubble chart ─────────────────────────────────────────
+# Samples for which the abundance metrics are defined (at least two clusters
+# holding at least one sequence).
+fig8_metrics = [m for m in div_metrics
+                if m["Shannon_abundance"] is not None and m["Clonality"] is not None]
 fig8_traces = [{
-    "x": [m["Shannon"] for m in div_metrics],
-    "y": [m["Pct_expanded"] for m in div_metrics],
+    "x": [m["Shannon_abundance"] for m in fig8_metrics],
+    "y": [m["Clonality"] for m in fig8_metrics],
     "mode": "markers+text",
     "type": "scatter",
-    "text": [m["Sample"] for m in div_metrics],
+    "text": [m["Sample"] for m in fig8_metrics],
     "textposition": "top center",
     "marker": {
-        "size": [math.sqrt(m["Unique_CDR3s"])/4 for m in div_metrics],
-        "color": [PALETTE.get(m["Sample"],"#888") for m in div_metrics],
+        "size": [math.sqrt(m["Unique_CDR3s"])/4 for m in fig8_metrics],
+        "color": [PALETTE.get(m["Sample"],"#888") for m in fig8_metrics],
         "opacity": 0.8
     },
-    "customdata": [[m["Unique_CDR3s"], m["Sample"]] for m in div_metrics],
+    "customdata": [[m["Unique_CDR3s"], m["Sample"], m["Clusters_per_1k_seqs"] or 0,
+                    m["Top1_pct"] or 0] for m in fig8_metrics],
     "hovertemplate": (
         "<b>%{customdata[1]}</b><br>"
-        "Shannon H': %{x:.3f}<br>"
-        "% Expanded: %{y:.1f}%<br>"
+        "Shannon H' (abundance): %{x:.3f}<br>"
+        "Clonality: %{y:.3f}<br>"
+        "Clusters per 1k sequences: %{customdata[2]:.2f}<br>"
+        "Largest clone: %{customdata[3]:.2f}% of sequences<br>"
         "Unique CDR3s: %{customdata[0]:,}<extra></extra>"
     )
 }]
 fig8_layout = {
     "title": {"text": "Repertoire Diversity Landscape", "font": {"size": 16, "color": "#2c3e50"}},
-    "xaxis": {"title": "Shannon Diversity Index (CDR3 length distribution)"},
-    "yaxis": {"title": "% Expanded Clonotypes (≥5 members)"},
+    "xaxis": {"title": "Shannon Diversity Index (clone abundances)"},
+    "yaxis": {"title": "Clonality (1 − Pielou evenness)", "range": [0, 1]},
     "showlegend": False,
     "plot_bgcolor": "#fafafa", "paper_bgcolor": "#ffffff"
 }
@@ -510,19 +541,39 @@ for m in div_metrics:
         f"<tr><td><strong>{m['Sample']}</strong></td>"
         f"<td>{m['Unique_CDR3s']:,}</td>"
         f"<td>{m['Total_Clusters']:,}</td>"
-        f"<td>{m['Shannon']:.3f}</td>"
+        f"<td>{m['Total_sequences']:,}</td>"
+        f"<td>{fmt_metric(m['Clusters_per_1k_seqs'], 2)}</td>"
+        f"<td>{fmt_metric(m['Shannon_abundance'])}</td>"
+        f"<td>{fmt_metric(m['Clonality'])}</td>"
+        f"<td>{fmt_metric(m['Simpson'])}</td>"
+        f"<td>{fmt_metric(m['Gini'])}</td>"
+        f"<td>{fmt_metric(m['D50'])}</td>"
+        f"<td>{fmt_metric(m['Top1_pct'], 2, '%')}</td>"
+        f"<td>{fmt_metric(m['Top10_pct'], 2, '%')}</td>"
+        f"<td>{m['Shannon_len']:.3f}</td>"
         f"<td>{badge(m['Pct_expanded'])}</td>"
         f"<td>{m['Pct_large']:.2f}%</td></tr>"
     )
 
 metrics_table = f"""
+<div style="overflow-x:auto">
 <table class="metrics-table">
   <thead><tr>
-    <th>Sample</th><th>Unique CDR3s</th><th>Total Clusters</th>
-    <th>Shannon H'</th><th>% Expanded (≥5)</th><th>% Large (≥1000)</th>
+    <th>Sample</th><th>Unique CDR3s</th><th>Clusters</th><th>Clustered sequences</th>
+    <th title="Number of clusters per 1000 clustered sequences: richness normalised for sequencing depth">Clusters / 1k seqs</th>
+    <th title="Shannon index computed on clone abundances">Shannon H' (abundance)</th>
+    <th title="1 - Pielou evenness of the clone abundances">Clonality</th>
+    <th title="Gini-Simpson index, 1 - sum(p²)">Simpson</th>
+    <th title="Gini coefficient of the cluster size distribution">Gini</th>
+    <th title="Smallest number of clones covering 50% of the sequences">D50</th>
+    <th title="Share of the sequences carried by the largest clone">Top1</th>
+    <th title="Share of the sequences carried by the ten largest clones">Top10</th>
+    <th title="Shannon entropy of the CDR3 length distribution: evenness of lengths, not repertoire diversity">CDR3 length evenness (H')</th>
+    <th>% Expanded (≥5)</th><th>% Large (≥1000)</th>
   </tr></thead>
   <tbody>{table_rows}</tbody>
-</table>"""
+</table>
+</div>"""
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 5. CSS
@@ -823,8 +874,11 @@ html = f"""<!DOCTYPE html>
       f"Values are bounded below by the {identity_pct} clustering threshold, so the panel describes homogeneity within that window only.",
       "Mean Member Identity to Cluster Representative")}
     {make_fig("fig8", fig8_traces, fig8_layout,
-      "Bubble chart: Shannon diversity (x) vs % expanded clones (y); bubble size = unique CDR3 count. "
-      "Samples top-right have both breadth and depth of immune response.",
+      "Bubble chart: Shannon index of the clone abundances (x) against clonality, 1 − Pielou evenness (y); "
+      "bubble size = unique CDR3 count. Samples move to the lower right as sequences are spread evenly over many "
+      "clones, and to the upper left as they concentrate into a few dominant lineages. Both axes are computed on "
+      "cluster sizes, so they are comparable across samples only alongside the depth-normalised richness "
+      "(clusters per 1000 sequences) reported in the table above.",
       "Repertoire Diversity Landscape")}
   </div>
 </div>
@@ -860,7 +914,9 @@ html = f"""<!DOCTYPE html>
 
     <div class="methods-card">
       <h3>📐 Diversity Metrics</h3>
-      <p><strong>Shannon Diversity Index (H'):</strong> calculated on CDR3 length distributions. Higher H' indicates more even representation across lengths (broader paratope space).</p>
+      <p><strong>Shannon H' (abundance):</strong> −Σ p<sub>i</sub> ln p<sub>i</sub> over the clone frequencies p<sub>i</sub> = cluster size / clustered sequences. <strong>Clonality</strong> is 1 − H'/ln(S), with S the number of clusters: 0 when every clone is equally abundant, approaching 1 as the library concentrates into one lineage (undefined, and reported as NA, when S = 1). <strong>Simpson</strong> is the Gini–Simpson index 1 − Σ p<sub>i</sub>², <strong>Gini</strong> the Gini coefficient of the cluster sizes, <strong>D50</strong> the smallest number of clones covering half of the sequences, and <strong>Top1/Top10</strong> the share of the library held by the largest one or ten clones.</p>
+      <p><strong>Clusters per 1000 sequences:</strong> richness normalised by sequencing depth. Absolute cluster counts are not comparable between libraries sequenced at different depths; this ratio is.</p>
+      <p><strong>CDR3 length evenness (H'):</strong> Shannon entropy of the CDR3 <em>length</em> distribution. It measures how evenly paratope lengths are spread and is reported separately from the abundance-based indices above, which it must not be confused with.</p>
       <p><strong>% Expanded Clonotypes:</strong> fraction of clusters with ≥5 members; reflects the proportion of somatically expanded B-cell lineages.</p>
       <p><strong>Intra-clonal homogeneity:</strong> distribution, across clusters, of the mean percent identity of the non-representative members to the cluster representative. Singleton clusters are excluded, the quantity being undefined for them. It is a descriptive summary bounded below by the {identity_pct} clustering threshold, not a germline-referenced mutation rate.</p>
     </div>
