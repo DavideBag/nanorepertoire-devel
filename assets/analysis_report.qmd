@@ -118,11 +118,12 @@ ggplot(data = clusterbig) +
 #| label: clusterMembersPlot
 
 # Genera un grafico a dispersione che mostra l'identità della sequenza rispetto al rappresentante del cluster.
+# I cluster singleton hanno Identity = NA (nessun membro da confrontare) e vengono esclusi.
 
-ggplot(data = clusterbig) +
+ggplot(data = clusterbig %>% filter(!is.na(Identity))) +
     geom_point(aes(x = Count, y = Identity), position = "jitter") +
     xlab("Number of Cluster Members") +
-    ylab("Average Sequence Identity\nto Cluster Representative") +
+    ylab("Mean Sequence Identity of Members\nto Cluster Representative (%)") +
     facet_wrap(~Sample)
 ```
 
@@ -132,6 +133,8 @@ We summarise cluster counts based on the number of member sequences.
 #| label: clustercountsTable
 
 # Crea una tabella che riassume il numero di cluster in base alla dimensione del cluster.
+# Total_sequences e' il denominatore necessario per calcolare le frazioni clonali
+# (quota della libreria occupata dal clone dominante e dai primi dieci cloni).
 
 clusterbig$five <- clusterbig$Count >= 5
 clusterbig$hundred <- clusterbig$Count >= 100
@@ -143,23 +146,10 @@ clustercounts <- clusterbig %>%
         Clusters = n(),
         Clusters_of_5 = sum(five),
         Clusters_of_100 = sum(hundred),
-        Clusters_of_1000 = sum(thousand)
-    )
-
-kable(clustercounts) %>%
-    kable_styling()
-
-clusterbig$five <- clusterbig$Count >= 5
-clusterbig$hundred <- clusterbig$Count >= 100
-clusterbig$thousand <- clusterbig$Count >= 1000
-
-clustercounts <- clusterbig %>%
-    group_by(Sample) %>%
-    summarize(
-        Clusters = n(),
-        Clusters_of_5 = sum(five),
-        Clusters_of_100 = sum(hundred),
-        Clusters_of_1000 = sum(thousand)
+        Clusters_of_1000 = sum(thousand),
+        Total_sequences = sum(Count),
+        Top1_count = max(Count),
+        Top10_count = sum(sort(Count, decreasing = TRUE)[1:min(10, n())])
     )
 
 kable(clustercounts) %>%
