@@ -30,6 +30,8 @@ process NANOREPERTOIRE_REPORT {
         --cdrhists ${cdrhists} \\
         --clusterbig ${clusterbig} \\
         --fastaseq ${fastaseq} \\
+        --identity-threshold ${params.cdhit_identity * 100} \\
+        --word-size ${params.cdhit_word_size} \\
         --output ${prefix}.html \\
         ${args}
 

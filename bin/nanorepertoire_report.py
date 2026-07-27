@@ -47,6 +47,11 @@ parser.add_argument("--cdrhists", nargs="*", help="One or more CDR3 size histogr
 parser.add_argument("--clusterbig", nargs="*", help="One or more large cluster detail CSVs")
 parser.add_argument("--fastaseq", nargs="*", help="One or more unique CDR3 sequence CSVs/FASTAs")
 parser.add_argument("--output", default="nanorepertoire_report.html", help="Output HTML file path")
+parser.add_argument("--identity-threshold", type=float, default=90.0,
+                    help="CD-HIT sequence identity threshold used for clustering, as a percentage "
+                         "(default: 90.0)")
+parser.add_argument("--word-size", type=int, default=5,
+                    help="CD-HIT word size (-n) used for clustering (default: 5)")
 
 args = parser.parse_args()
 
@@ -57,6 +62,12 @@ cdrhists      = read_and_merge(args.cdrhists)
 clusterbig    = read_and_merge(args.clusterbig)
 fastaseq      = read_and_merge(args.fastaseq)
 output_html   = args.output
+
+# Clustering parameters, reported verbatim in the text of the report so that the
+# document always describes the analysis that was actually run.
+identity_threshold = args.identity_threshold
+word_size          = args.word_size
+identity_pct       = f"{identity_threshold:g}%"
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 1. DATA PREPARATION
@@ -656,7 +667,7 @@ html = f"""<!DOCTYPE html>
     <div class="kpi-card">
       <div class="kpi-label">Total Clusters (CD-HIT)</div>
       <div class="kpi-value">{total_clusters:,}</div>
-      <div class="kpi-sub">90% identity threshold</div>
+      <div class="kpi-sub">{identity_pct} identity threshold</div>
     </div>
     <div class="kpi-card">
       <div class="kpi-label">Unique CDR3 Sequences</div>
@@ -685,7 +696,7 @@ html = f"""<!DOCTYPE html>
     <h2>Clonal Cluster Analysis</h2>
   </div>
   <div class="section-intro">
-    Amino acid sequences were clustered using <strong>CD-HIT</strong> at 90% identity, following the landmark approach of Deschaght et al. (2017).
+    Amino acid sequences were clustered using <strong>CD-HIT</strong> at {identity_pct} identity, following the landmark approach of Deschaght et al. (2017).
     <strong>Expanded clonotypes</strong> (≥5 members) represent B‑cell lineages that have undergone antigen‑driven somatic expansion.
     Large clusters (≥1000 members) are dominant clonal responses — prime candidates for high‑affinity nanobodies.
     The cluster size distribution mirrors the "clonotype expansion" readout of tools like MiXCR and IMGT/VQuest.
@@ -810,9 +821,9 @@ html = f"""<!DOCTYPE html>
       <h3>🧩 CD-HIT Clustering</h3>
       <p>Translated amino acid sequences were clustered with <strong>CD-HIT</strong>:</p>
       <ul>
-        <li>Identity threshold: 0.90 (90%)</li>
-        <li>Word size: 5</li>
-        <li>Sequence coverage ≥ 90%</li>
+        <li>Identity threshold: {identity_threshold/100:.2f} ({identity_pct})</li>
+        <li>Word size: {word_size}</li>
+        <li>Global identity alignment (CD-HIT default <code>-G 1</code>); no minimum alignment coverage is imposed</li>
         <li>Four size thresholds analysed: 1, ≥5, ≥100, ≥1000</li>
       </ul>
       <p>This follows the validated approach of Deschaght et al. (2017) for large nanobody repertoires.</p>

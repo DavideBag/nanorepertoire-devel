@@ -251,6 +251,13 @@
                     "description": "Sequence identity threshold for CD-HIT clustering.",
                     "fa_icon": "fas fa-compress-arrows-alt"
                 },
+                "cdhit_word_size": {
+                    "type": "integer",
+                    "default": 5,
+                    "description": "Word size (-n) used by CD-HIT for clustering.",
+                    "help_text": "Must be compatible with the chosen identity threshold: CD-HIT recommends a word size of 5 for identities of 0.7 and above, 4 for 0.6-0.7, 3 for 0.5-0.6 and 2 for 0.4-0.5.",
+                    "fa_icon": "fas fa-text-width"
+                },
                 "cluster_size_threshold": {
                     "type": "integer",
                     "default": 1,
