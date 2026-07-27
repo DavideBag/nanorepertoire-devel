@@ -398,10 +398,30 @@ fig8_layout = {
     "plot_bgcolor": "#fafafa", "paper_bgcolor": "#ffffff"
 }
 
-# ── Fig 9: Identity to representative histogram (SHM proxy) ───────────────
+# ── Fig 9: Identity to representative histogram (intra-clonal homogeneity) ─
+# One value per *cluster*, not per sequence: Identity is the mean identity of
+# the non-representative members of that cluster. Singleton clusters carry NA
+# (no member to compare with the representative) and are excluded here rather
+# than being coerced to 0, which would create a spurious peak at the origin.
+def parse_identity(value):
+    """Return the mean identity of a cluster, or None when it is not defined."""
+    if value is None:
+        return None
+    value = str(value).strip()
+    if value in ("", "NA", "NaN", "nan", "None"):
+        return None
+    try:
+        return float(value)
+    except ValueError:
+        return None
+
 ident_by_sample = defaultdict(list)
 for r in clusterbig:
-    ident_by_sample[r["Sample"]].append(to_float(r.get("Identity", 0)))
+    val = parse_identity(r.get("Identity"))
+    if val is not None:
+        ident_by_sample[r["Sample"]].append(val)
+
+n_informative = sum(len(v) for v in ident_by_sample.values())
 
 fig9_traces = []
 for s in samples:
@@ -410,17 +430,18 @@ for s in samples:
     fig9_traces.append({
         "x": vals,
         "type": "histogram",
-        "name": s,
+        "name": f"{s} (n = {len(vals):,})",
         "nbinsx": 50,
         "marker": {"color": col + "BB", "line": {"color": col, "width": 0.5}},
         "opacity": 0.7,
-        "hovertemplate": f"<b>{s}</b><br>Identity: %{{x:.1f}}%<br>Count: %{{y:,}}<extra></extra>"
+        "hovertemplate": f"<b>{s}</b><br>Mean identity: %{{x:.1f}}%<br>Clusters: %{{y:,}}<extra></extra>"
     })
 fig9_layout = {
     "barmode": "overlay",
-    "title": {"text": "Sequence Identity to Cluster Representative (SHM Proxy)", "font": {"size": 16, "color": "#2c3e50"}},
-    "xaxis": {"title": "% Identity to Representative", "range": [0, 101]},
-    "yaxis": {"title": "Number of Sequences (sampled)"},
+    "title": {"text": "Mean Member Identity to Cluster Representative", "font": {"size": 16, "color": "#2c3e50"}},
+    "xaxis": {"title": "Mean % Identity of Members to Representative",
+              "range": [identity_threshold - 1, 100.5]},
+    "yaxis": {"title": "Number of Clusters"},
     "legend": {"title": {"text": "Sample"}},
     "plot_bgcolor": "#fafafa", "paper_bgcolor": "#ffffff"
 }
@@ -647,7 +668,7 @@ html = f"""<!DOCTYPE html>
   <a href="#clusters"><span class="nav-num">1</span>Clonal Clusters</a>
   <a href="#cdr3"><span class="nav-num">2</span>CDR3 Diversity</a>
   <a href="#aminoacids"><span class="nav-num">3</span>Amino Acids</a>
-  <a href="#clonality"><span class="nav-num">4</span>Clonality &amp; SHM</a>
+  <a href="#clonality"><span class="nav-num">4</span>Clonality</a>
   <a href="#methods"><span class="nav-num">5</span>Methods</a>
 </nav>
 
@@ -779,20 +800,28 @@ html = f"""<!DOCTYPE html>
 <div id="clonality" class="section">
   <div class="section-header">
     <div class="section-number">4</div>
-    <h2>Clonality &amp; Somatic Hypermutation (SHM) Proxy</h2>
+    <h2>Clonality &amp; Intra-clonal Homogeneity</h2>
   </div>
   <div class="section-intro">
-    Sequence identity to the cluster representative is a proxy for <strong>somatic hypermutation (SHM)</strong>.
-    Sequences at &lt; 100% identity have been diversified through SHM during affinity maturation.
-    A <em>bimodal distribution</em> (peak at 100% + shoulder at 90–99%) is the hallmark of an active affinity maturation response.
-    This is analogous to the V-gene mutation frequency reported by MiXCR and IMGT/VQuest for conventional immunoglobulin repertoires.
-    The <strong>Shannon Diversity Index (H')</strong> quantifies repertoire breadth: higher H' = more even CDR3 length distribution (broader coverage of antigen space).
-    <br><cite>Bolotin et al. 2015 (MiXCR). Nature Methods. doi:10.1038/nmeth.3364 · Robins 2009. J. Immunol. Methods.</cite>
+    The mean identity of the members of a cluster to its representative is a <strong>descriptive measure of
+    intra-clonal homogeneity</strong>: clusters close to 100% are internally uniform, clusters closer to the
+    clustering threshold group sequences that differ more from their representative.
+    <strong>This quantity is truncated by construction</strong>: CD-HIT admits a sequence into a cluster only if
+    its identity to the representative is at least {identity_pct}, so no value below that threshold can be
+    observed and the distribution is bounded on the left by the clustering parameter itself.
+    It is therefore <em>not</em> an estimate of somatic hypermutation, and it is not equivalent to the V-gene
+    mutation frequency reported by MiXCR or IMGT/V-QUEST, which is measured against an inferred germline
+    reference rather than against an empirically chosen cluster member; the analogy is conceptual only.
+    Sequence-level differences within a cluster may equally reflect somatic mutation, PCR and sequencing error,
+    or repeated sampling of the same molecule, which this workflow does not deduplicate and therefore cannot tell apart.
+    <br><cite>Li &amp; Godzik 2006 (CD-HIT). Bioinformatics. doi:10.1093/bioinformatics/btl158 · Bolotin et al. 2015 (MiXCR). Nature Methods. doi:10.1038/nmeth.3364</cite>
   </div>
   <div class="grid-2">
     {make_fig("fig9", fig9_traces, fig9_layout,
-      "Histogram of % identity to cluster representative (sampled). A peak at 100% indicates clonal copies; sequences at 90–99% have accumulated mutations through SHM.",
-      "Identity to Representative (SHM Proxy)")}
+      f"Distribution of the mean identity of cluster members to their representative, one value per cluster "
+      f"(n = {n_informative:,} multi-member clusters; singletons are excluded because the quantity is undefined for them). "
+      f"Values are bounded below by the {identity_pct} clustering threshold, so the panel describes homogeneity within that window only.",
+      "Mean Member Identity to Cluster Representative")}
     {make_fig("fig8", fig8_traces, fig8_layout,
       "Bubble chart: Shannon diversity (x) vs % expanded clones (y); bubble size = unique CDR3 count. "
       "Samples top-right have both breadth and depth of immune response.",
@@ -833,7 +862,7 @@ html = f"""<!DOCTYPE html>
       <h3>📐 Diversity Metrics</h3>
       <p><strong>Shannon Diversity Index (H'):</strong> calculated on CDR3 length distributions. Higher H' indicates more even representation across lengths (broader paratope space).</p>
       <p><strong>% Expanded Clonotypes:</strong> fraction of clusters with ≥5 members; reflects the proportion of somatically expanded B-cell lineages.</p>
-      <p><strong>SHM Proxy:</strong> distribution of sequence identity to the CD-HIT cluster representative, equivalent to V-gene mutation rate in conventional repertoire tools (MiXCR).</p>
+      <p><strong>Intra-clonal homogeneity:</strong> distribution, across clusters, of the mean percent identity of the non-representative members to the cluster representative. Singleton clusters are excluded, the quantity being undefined for them. It is a descriptive summary bounded below by the {identity_pct} clustering threshold, not a germline-referenced mutation rate.</p>
     </div>
 
     <div class="methods-card">
