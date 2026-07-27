@@ -146,7 +146,11 @@ var_len    = sum((x - mean_len)**2 for x in all_cdr3_lens) / len(all_cdr3_lens) 
 sd_len     = math.sqrt(var_len)
 median_len = sorted(all_cdr3_lens)[len(all_cdr3_lens)//2] if all_cdr3_lens else 0
 
-total_seqs     = sum(to_int(r.get("cdr3_len", 1)) for r in fastaseq) or len(fastaseq)
+# Number of translated sequences for which the CDR3 caller returned a CDR3.
+# Rows with no called CDR3 carry "NA" in the CDR3 column of fastaSeq.csv.
+seqs_with_cdr3 = sum(
+    1 for r in fastaseq if (r.get("CDR3") or "").strip() not in ("", "NA")
+)
 total_clusters = sum(to_int(r["Clusters"]) for r in clustercounts)
 total_cdr3     = sum(to_int(r["Unique_CDR3s"]) for r in cdrcounts) or sum(len(set(v)) for v in cdr3_by_sample.values())
 
@@ -645,9 +649,9 @@ html = f"""<!DOCTYPE html>
   </div>
   <div class="kpi-grid">
     <div class="kpi-card">
-      <div class="kpi-label">Unique CDR3 Sequences</div>
-      <div class="kpi-value">{len(fastaseq):,}</div>
-      <div class="kpi-sub">Across all samples</div>
+      <div class="kpi-label">Sequences with a called CDR3</div>
+      <div class="kpi-value">{seqs_with_cdr3:,}</div>
+      <div class="kpi-sub">Total across all samples</div>
     </div>
     <div class="kpi-card">
       <div class="kpi-label">Total Clusters (CD-HIT)</div>
@@ -655,9 +659,9 @@ html = f"""<!DOCTYPE html>
       <div class="kpi-sub">90% identity threshold</div>
     </div>
     <div class="kpi-card">
-      <div class="kpi-label">Total Unique CDR3s</div>
+      <div class="kpi-label">Unique CDR3 Sequences</div>
       <div class="kpi-value">{total_cdr3:,}</div>
-      <div class="kpi-sub">Novel paratopes detected</div>
+      <div class="kpi-sub">Distinct paratopes</div>
     </div>
     <div class="kpi-card">
       <div class="kpi-label">Mean CDR3 Length</div>
