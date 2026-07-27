@@ -13,6 +13,9 @@ The directories listed below will be created in the results directory after the 
 The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes data using the following steps:
 
 - [FastQC](#fastqc) - Raw read QC
+- [Clustering summaries](#clustering-summaries) - Per-cluster tables produced from the CD-HIT output
+- [Aggregated statistics](#aggregated-statistics) - Tabular exports shared by the two reports
+- [Repertoire report](#repertoire-report) - Interactive HTML report and its QC tables
 - [MultiQC](#multiqc) - Aggregate report describing results and QC from the whole pipeline
 - [Pipeline information](#pipeline-information) - Report metrics generated during the workflow execution
 
@@ -28,6 +31,87 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
 </details>
 
 [FastQC](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/) gives general quality metrics about your sequenced reads. It provides information about the quality score distribution across your reads, per base sequence content (%A/T/G/C), adapter contamination and overrepresented sequences. For further reading and documentation see the [FastQC help pages](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/Help/).
+
+### Clustering summaries
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `readcdhit/`
+  - `*_clusters.summary`: one row per CD-HIT cluster, in CSV format.
+
+</details>
+
+`*_clusters.summary` is produced by `bin/readcdout.py` from the `.clstr` file written by CD-HIT and has the following schema:
+
+| Column | Type | Description |
+| :--- | :--- | :--- |
+| `Representative` | string | Identifier of the sequence CD-HIT chose as the cluster representative. |
+| `Count` | integer | Number of sequences in the cluster, representative included. |
+| `Identity` | float or `NA` | Mean percent identity of the **non-representative** members to the representative, as reported by CD-HIT. `NA` for singleton clusters: with a single member there is nothing to compare against the representative, so the mean is undefined. It is not 100%. |
+| `Identity_n` | integer | Number of members contributing to `Identity`, i.e. `Count - 1`. `0` for singletons. |
+
+Because `Identity` is nullable, any downstream consumer must exclude `NA` rather than coerce it to a number: coercing to `0` places singletons at the origin of the identity histogram, and coercing to `100` asserts a perfect identity that was never measured. Values are bounded below by the clustering threshold (`--cdhit_identity`), since CD-HIT does not admit a sequence into a cluster below it.
+
+### Aggregated statistics
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `aggregate_stats/`
+  - `analysis_report.html`: static scientific summary rendered from `assets/analysis_report.qmd`.
+  - `nanobodies_report.RData`: serialised R workspace for downstream analysis.
+  - `clustercounts.csv`, `cdrcounts.csv`, `cdrhists.csv`, `clusterbig.csv`, `fastaSeq.csv`: tabular exports consumed by the interactive report.
+  - `cdr3_boost_overview_table.tsv`, `sampledata.tsv`: merged CDR3 and sample metadata tables.
+
+</details>
+
+`clustercounts.csv` holds one row per sample:
+
+| Column | Description |
+| :--- | :--- |
+| `Sample` | Sample identifier. |
+| `Clusters` | Number of clusters. |
+| `Clusters_of_5`, `Clusters_of_100`, `Clusters_of_1000` | Number of clusters with at least 5, 100 and 1000 members. |
+| `Total_sequences` | Total number of clustered sequences, `sum(Count)`. This is the denominator of every clonal fraction. |
+| `Top1_count` | Size of the largest cluster. |
+| `Top10_count` | Combined size of the ten largest clusters. |
+
+`clusterbig.csv` is the concatenation of the per-sample `*_clusters.summary` files, with a `Sample` column and the three size-class flags used by the report; it therefore carries the `Identity`/`Identity_n` semantics described above.
+
+### Repertoire report
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `report/`
+  - `nanorepertoire_report.html`: interactive HTML report.
+  - `cdr3_boundary_qc.tsv`: per-sample summary of the CDR3 annotation QC.
+  - `cdr3_boundary_offsets.tsv`: full distribution of the CDR3 boundary offsets.
+
+</details>
+
+Every figure of the report is described in the [README](../README.md#what-the-interactive-report-shows).
+
+The diversity metrics table at the top of section 1 reports, for each sample, the quantities defined below. Metrics that are undefined for a sample are shown as `NA` rather than as a number. Throughout, `S` is the number of clusters of the sample, `c_i` the size of cluster `i`, `N = Σ c_i` the number of clustered sequences and `p_i = c_i / N` the clonal frequency.
+
+| Metric | Definition | Notes |
+| :--- | :--- | :--- |
+| `Clusters` | `S` | Cluster richness. Not comparable between libraries sequenced at different depths. |
+| `Clustered sequences` | `N` | Denominator of every fraction below. |
+| `Clusters_per_1k_seqs` | `1000 · S / N` | Richness normalised by sequencing depth. This is the readout to use when comparing libraries of different size. |
+| `Shannon_abundance` | `H' = −Σ p_i ln p_i` | Shannon index over clone abundances. `NA` when `N = 0`. |
+| `Shannon_norm` | `H' / ln(S)` | Pielou's evenness. `NA` when `S = 1`, where `ln(S) = 0`. |
+| `Clonality` | `1 − Shannon_norm` | `0` when every clone is equally abundant, approaching `1` as the library concentrates into one lineage. `NA` when `Shannon_norm` is. |
+| `Simpson` | `1 − Σ p_i²` | Gini–Simpson index: probability that two sequences drawn at random belong to different clones. |
+| `Gini` | Gini coefficient of `{c_i}` | `0` for equally sized clusters, approaching `1` as the sequences concentrate into one cluster. |
+| `D50` | `min{k : Σ_{i≤k} c_(i) ≥ N/2}` over clusters sorted by decreasing size | Smallest number of clones covering half of the sequences. |
+| `Top1_pct`, `Top10_pct` | `100 · c_(1) / N`, `100 · Σ_{i≤10} c_(i) / N` | Share of the library held by the largest one and ten clones, the standard AIRR clonal-fraction readout. |
+| `Shannon_len` | `−Σ q_l ln q_l` over the CDR3 **length** distribution | Labelled "CDR3 length evenness (H')" in the report. It measures how evenly paratope lengths are spread and is **not** a repertoire diversity index. |
+| `Pct_expanded` | `100 · Clusters_of_5 / S` | Proportion of clusters with at least 5 members. |
+| `Pct_large` | `100 · Clusters_of_1000 / S` | Proportion of clusters with at least 1000 members. |
+
+`cdr3_boundary_qc.tsv` compares the CDR3 called by nanoCDR-X with the motif-based definition (start after the framework-3 `T..Y.C` anchor, end before the framework-4 `WG.G` anchor, falling back to the C-terminal `TVSS` motif when the conserved tryptophan is substituted). Offsets are in residues, relative to that reference: a positive C-terminal offset means the called CDR3 extends into framework 4. `Compared` counts the sequences for which both anchors could be located and the called CDR3 was found in the sequence; the three `Skipped_*` columns account for the remainder.
 
 ### MultiQC
 

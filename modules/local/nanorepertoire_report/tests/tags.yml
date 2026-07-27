@@ -1,0 +1,5 @@
+nanorepertoire_report:
+  - "modules/local/nanorepertoire_report/**"
+  - "bin/nanorepertoire_report.py"
+  - "bin/repertoire_metrics.py"
+  - "bin/cdr3_boundary_qc.py"

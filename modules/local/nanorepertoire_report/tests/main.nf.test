@@ -1,0 +1,75 @@
+nextflow_process {
+
+    name "Test Process NANOREPERTOIRE_REPORT"
+    script "../main.nf"
+    process "NANOREPERTOIRE_REPORT"
+    config "./nextflow.config"
+    tag "modules"
+    tag "modules_nfcore"
+    tag "nanorepertoire_report"
+
+    test("interactive report") {
+
+        when {
+            process {
+                """
+                input[0] = file("$projectDir/tests/data/report/clustercounts.csv", checkIfExists: true)
+                input[1] = file("$projectDir/tests/data/report/cdrcounts.csv", checkIfExists: true)
+                input[2] = file("$projectDir/tests/data/report/cdrhists.csv", checkIfExists: true)
+                input[3] = file("$projectDir/tests/data/report/clusterbig.csv", checkIfExists: true)
+                input[4] = file("$projectDir/tests/data/report/fastaSeq.csv", checkIfExists: true)
+                """
+            }
+        }
+
+        then {
+            def report = path(process.out.report[0]).text
+            def qc = path(process.out.boundary_qc[0]).readLines()
+            def offsets = path(process.out.boundary_offsets[0]).readLines()
+
+            assertAll(
+                { assert process.success },
+
+                // The report is rendered and carries its figures.
+                { assert report.contains("Plotly.newPlot('fig1'") },
+                { assert report.contains("Plotly.newPlot('fig8'") },
+                { assert report.contains("Plotly.newPlot('fig9'") },
+                { assert report.contains("Plotly.newPlot('fig11'") },
+
+                // Clonal abundance metrics are present in the diversity table.
+                // Values are deliberately not asserted, only their presence.
+                { assert report.contains("Shannon H' (abundance)") },
+                { assert report.contains("Clonality") },
+                { assert report.contains("Simpson") },
+                { assert report.contains("Gini") },
+                { assert report.contains("D50") },
+                { assert report.contains("Top1") },
+                { assert report.contains("Top10") },
+                { assert report.contains("Clusters / 1k seqs") },
+
+                // The length-based index must stay distinguishable from the
+                // abundance-based one.
+                { assert report.contains("CDR3 length evenness (H')") },
+
+                // Corrected labels of the summary cards and of the identity panel.
+                { assert report.contains("Sequences with a called CDR3") },
+                { assert !report.contains("Novel paratopes detected") },
+                { assert report.contains("Number of Clusters") },
+                { assert !report.contains("Number of Sequences (sampled)") },
+
+                // The clustering threshold is taken from the parameters, not hardcoded.
+                { assert report.contains("90% identity threshold") },
+
+                // CDR3 annotation QC tables.
+                { assert qc[0].split("\\t").contains("Exact_concordance_pct") },
+                { assert qc[0].split("\\t").contains("Median_N_offset") },
+                { assert qc[0].split("\\t").contains("Median_C_offset") },
+                { assert qc.size() > 1 },
+                { assert offsets[0].split("\\t") == ["Sample", "Terminus", "Offset", "Sequences", "Pct"] },
+                { assert offsets.size() > 1 },
+
+                { assert path(process.out.versions[0]).exists() }
+            )
+        }
+    }
+}

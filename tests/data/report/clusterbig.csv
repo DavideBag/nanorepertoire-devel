@@ -1,0 +1,11 @@
+Representative,Count,Identity,Identity_n,Sample,five,hundred,thousand
+sample01_rep0,1,NA,0,sample01,FALSE,FALSE,FALSE
+sample01_rep1,1,NA,0,sample01,FALSE,FALSE,FALSE
+sample01_rep2,4,93.4,3,sample01,FALSE,FALSE,FALSE
+sample01_rep3,12,95.1,11,sample01,TRUE,FALSE,FALSE
+sample01_rep4,150,96.8,149,sample01,TRUE,TRUE,FALSE
+sample02_rep0,1,NA,0,sample02,FALSE,FALSE,FALSE
+sample02_rep1,3,91.7,2,sample02,FALSE,FALSE,FALSE
+sample02_rep2,7,93.4,6,sample02,TRUE,FALSE,FALSE
+sample02_rep3,40,95.1,39,sample02,TRUE,FALSE,FALSE
+sample02_rep4,900,96.8,899,sample02,TRUE,TRUE,FALSE
