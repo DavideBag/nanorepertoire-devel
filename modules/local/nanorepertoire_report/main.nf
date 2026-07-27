@@ -15,6 +15,8 @@ process NANOREPERTOIRE_REPORT {
 
     output:
     path "*.html", emit: report
+    path "cdr3_boundary_qc.tsv", emit: boundary_qc
+    path "cdr3_boundary_offsets.tsv", emit: boundary_offsets
     path "versions.yml", emit: versions
 
     when:

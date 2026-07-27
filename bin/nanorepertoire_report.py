@@ -7,6 +7,7 @@ from datetime import datetime
 # which is on PATH but not necessarily on PYTHONPATH.
 sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
 from repertoire_metrics import abundance_metrics
+from cdr3_boundary_qc import summarise as summarise_boundaries, write_summary_tsv, write_distribution_tsv
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 0. I/O & ARGUMENT PARSING
@@ -477,6 +478,74 @@ fig9_layout = {
     "plot_bgcolor": "#fafafa", "paper_bgcolor": "#ffffff"
 }
 
+# ── Fig 11: CDR3 boundary QC ──────────────────────────────────────────────
+# Compares the CDR3 called by nanoCDR-X with the motif-based definition
+# (start after the YYC anchor, end before the WGQ anchor). This measures the
+# annotation, it does not change it.
+boundary_qc = summarise_boundaries(
+    (r.get("Sample", r.get("sample", "Unknown")), r.get("CDR3"), r.get("sequence"))
+    for r in fastaseq
+)
+boundary_offsets = sorted({
+    off
+    for s in boundary_qc.values()
+    for dist in (s["n_offset_distribution"], s["c_offset_distribution"])
+    for off in dist
+})
+fig11_traces = []
+for s in samples:
+    qc = boundary_qc.get(s)
+    if not qc or not qc["compared"]:
+        continue
+    col = PALETTE.get(s, "#888888")
+    for terminus, dist, alpha in (("N", qc["n_offset_distribution"], "FF"),
+                                  ("C", qc["c_offset_distribution"], "80")):
+        total = sum(dist.values()) or 1
+        fig11_traces.append({
+            "x": [str(o) for o in boundary_offsets],
+            "y": [100.0 * dist.get(o, 0) / total for o in boundary_offsets],
+            "name": f"{s} · {terminus}-terminus",
+            "type": "bar",
+            "marker": {"color": col + alpha},
+            "hovertemplate": (f"<b>{s}</b><br>{terminus}-terminal offset: %{{x}} residues"
+                              "<br>%{y:.2f}% of compared sequences<extra></extra>")
+        })
+fig11_layout = {
+    "barmode": "group",
+    "title": {"text": "CDR3 Boundary Offsets: caller vs motif definition", "font": {"size": 16, "color": "#2c3e50"}},
+    "xaxis": {"title": "Offset from the motif-based boundary (residues)", "type": "category"},
+    "yaxis": {"title": "% of compared sequences (log scale)", "type": "log"},
+    "legend": {"title": {"text": "Sample · terminus"}},
+    "plot_bgcolor": "#fafafa", "paper_bgcolor": "#ffffff"
+}
+
+boundary_rows = ""
+for s in samples:
+    qc = boundary_qc.get(s)
+    if not qc:
+        continue
+    conc = qc["exact_concordance_pct"]
+    boundary_rows += (
+        f"<tr><td><strong>{s}</strong></td>"
+        f"<td>{qc['compared']:,} / {qc['sequences']:,}</td>"
+        f"<td>{'NA' if conc is None else f'{conc:.2f}%'}</td>"
+        f"<td>{fmt_metric(qc['median_n_offset'], 1)}</td>"
+        f"<td>{fmt_metric(qc['median_c_offset'], 1)}</td>"
+        f"<td>{fmt_metric(qc['median_called_length'], 1)}</td>"
+        f"<td>{fmt_metric(qc['median_reference_length'], 1)}</td></tr>"
+    )
+boundary_table = f"""
+<div style="overflow-x:auto">
+<table class="metrics-table">
+  <thead><tr>
+    <th>Sample</th><th>Sequences compared</th><th>Exact agreement</th>
+    <th>Median N-terminal offset</th><th>Median C-terminal offset</th>
+    <th>Median called length</th><th>Median reference length</th>
+  </tr></thead>
+  <tbody>{boundary_rows}</tbody>
+</table>
+</div>"""
+
 # ── Fig 10: Top-10 clusters per sample horizontal bar ─────────────────────
 top10_by_sample = defaultdict(list)
 for r in clusterbig:
@@ -820,6 +889,28 @@ html = f"""<!DOCTYPE html>
     "Area chart of CDR3 length frequency per sample. Peaks at specific lengths may indicate dominant structural motifs or antigen-driven convergence. "
     "Short CDR3s (&lt;12 AA): flat β-strand paratopes. Long CDR3s (&gt;16 AA): protruding loops for cavity/groove binding.",
     "CDR3 Length Frequency Profile")}
+
+  <div class="section-header" style="margin-top:34px">
+    <h2 style="font-size:1.15em">CDR3 annotation QC</h2>
+  </div>
+  <div class="section-intro">
+    Every length and composition figure above depends on where the CDR3 boundaries were placed, so the calls of the
+    deep-learning annotator are compared here against the motif-based definition documented in the Methods:
+    the loop starts immediately after the cysteine of the framework-3 anchor (<code>T..Y.C</code>, the <code>YYC</code>
+    motif) and ends immediately before the tryptophan of the framework-4 anchor (<code>WG.G</code>, the <code>WGQ</code>
+    motif; reads in which that tryptophan is substituted are anchored on the C-terminal <code>TVSS</code> motif instead).
+    An offset of 0 at both ends means the two definitions agree residue for residue. A systematically <em>positive</em>
+    C-terminal offset would mean the annotated CDR3 extends into framework 4, which is rich in A, T and V, and would
+    inflate those residues in the composition panels. Sequences in which neither anchor can be located are not comparable
+    and are counted separately. The full offset distribution is written to <code>cdr3_boundary_qc.tsv</code> and
+    <code>cdr3_boundary_offsets.tsv</code> next to this report.
+  </div>
+  <div style="margin-bottom:20px">{boundary_table}</div>
+  {make_fig("fig11", fig11_traces, fig11_layout,
+    "Distribution of the offsets between the called and the motif-based boundaries, per sample and per terminus, "
+    "as a percentage of the sequences that could be compared. The y axis is logarithmic so that rare disagreements "
+    "remain visible next to the dominant zero-offset bar.",
+    "CDR3 Boundary Offsets")}
 </div>
 
 <!-- ══════════════════════════════════════════════════
@@ -950,4 +1041,10 @@ html = f"""<!DOCTYPE html>
 print(f"Writing report to {output_html} ...")
 with open(output_html, "w", encoding="utf-8") as f:
     f.write(html)
+
+# Tabular companion of the CDR3 annotation QC panel, published alongside the report.
+qc_dir = os.path.dirname(os.path.abspath(output_html))
+write_summary_tsv(boundary_qc, os.path.join(qc_dir, "cdr3_boundary_qc.tsv"))
+write_distribution_tsv(boundary_qc, os.path.join(qc_dir, "cdr3_boundary_offsets.tsv"))
+print("Writing CDR3 boundary QC to cdr3_boundary_qc.tsv and cdr3_boundary_offsets.tsv ...")
 print(f"✅ Done! Open: {output_html}")
