@@ -1,0 +1,17 @@
+>Cluster 0
+0	193aa, >singleton_rep... *
+>Cluster 1
+0	136aa, >pair_member... at 90.44%
+1	139aa, >pair_rep... *
+>Cluster 2
+0	136aa, >five_a... at 92.65%
+1	136aa, >five_rep... *
+2	136aa, >five_b... at 93.38%
+3	136aa, >five_c... at 96.32%
+4	136aa, >five_d... at 97.79%
+>Cluster 3
+0	120aa, >local_rep... *
+1	118aa, >local_member... at 1:120:1:118/95.83%
+>Cluster 4
+0	118aa, >local_rev_rep... *
+1	118aa, >local_rev_member... at 1:118:1:118/-/99.15%
