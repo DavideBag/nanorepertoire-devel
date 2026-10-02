@@ -12,11 +12,45 @@
 
 - [FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/)
 
-> Andrews, S. (2010). FastQC: A Quality Control Tool for High Throughput Sequence Data [Online].
+  > Andrews, S. (2010). FastQC: A Quality Control Tool for High Throughput Sequence Data [Online].
 
 - [MultiQC](https://pubmed.ncbi.nlm.nih.gov/27312411/)
 
-> Ewels P, Magnusson M, Lundin S, Käller M. MultiQC: summarize analysis results for multiple tools and samples in a single report. Bioinformatics. 2016 Oct 1;32(19):3047-8. doi: 10.1093/bioinformatics/btw354. Epub 2016 Jun 16. PubMed PMID: 27312411; PubMed Central PMCID: PMC5039924.
+  > Ewels P, Magnusson M, Lundin S, Käller M. MultiQC: summarize analysis results for multiple tools and samples in a single report. Bioinformatics. 2016 Oct 1;32(19):3047-8. doi: 10.1093/bioinformatics/btw354. Epub 2016 Jun 16. PubMed PMID: 27312411; PubMed Central PMCID: PMC5039924.
+
+- [Cutadapt](https://pubmed.ncbi.nlm.nih.gov/25921511/)
+
+  > Martin M. Cutadapt removes adapter sequences from high-throughput sequencing reads. EMBnet.journal. 2011;17(1):10-12. doi: 10.14806/ej.17.1.200.
+
+- [FLASH](https://pubmed.ncbi.nlm.nih.gov/21903629/)
+
+  > Magoč T, Salzberg SL. FLASH: fast length adjustment of short reads to improve genome assemblies. Bioinformatics. 2011 Nov 1;27(21):2957-63. doi: 10.1093/bioinformatics/btr507. PubMed PMID: 21903629; PubMed Central PMCID: PMC3198573.
+
+- [CD-HIT](https://pubmed.ncbi.nlm.nih.gov/16731699/)
+
+  > Li W, Godzik A. Cd-hit: a fast program for clustering and comparing large sets of protein or nucleotide sequences. Bioinformatics. 2006 Jul 1;22(13):1658-9. doi: 10.1093/bioinformatics/btl158. PubMed PMID: 16731699.
+
+  > Fu L, Niu B, Zhu Z, Wu S, Li W. CD-HIT: accelerated for clustering the next-generation sequencing data. Bioinformatics. 2012 Dec 1;28(23):3150-2. doi: 10.1093/bioinformatics/bts565. PubMed PMID: 23060610; PubMed Central PMCID: PMC3516142.
+
+- [seqtk](https://github.com/lh3/seqtk)
+
+  > Li H. seqtk: Toolkit for processing sequences in FASTA/Q formats. GitHub. https://github.com/lh3/seqtk.
+
+- [Biopython](https://pubmed.ncbi.nlm.nih.gov/19304878/)
+
+  > Cock PJ, Antao T, Chang JT, Chapman BA, Cox CJ, Dalke A, Friedberg I, Hamelryck T, Kauff F, Wilczynski B, de Hoon MJ. Biopython: freely available Python tools for computational molecular biology and bioinformatics. Bioinformatics. 2009 Jun 1;25(11):1422-3. doi: 10.1093/bioinformatics/btp163. PubMed PMID: 19304878; PubMed Central PMCID: PMC2682512.
+
+- [NanoCDR-X](https://github.com/lescailab/nanocdr-x)
+
+  > Bagordo D, Trèves G, Santorsola M, Colombo G, Lescai F. Adaptive Disorder as the Hallmark of Nanobodies Antigen-Binding Loops. J Chem Inf Model. 2026 Jun 8;66(11):6644-58. doi: 10.1021/acs.jcim.6c00716. PubMed PMID: 42170950; PubMed Central PMCID: PMC13250985.
+
+- [Quarto](https://quarto.org)
+
+  > Allaire JJ, Teague C, Scheidegger C, Xie Y, Dervieux C, Woodhull G. Quarto. Zenodo. doi: 10.5281/zenodo.5960048.
+
+- [Plotly](https://plotly.com/python/)
+
+  > Plotly Technologies Inc. Collaborative data science. Montréal, QC, 2015. https://plot.ly.
 
 ## Software packaging/containerisation tools
 
