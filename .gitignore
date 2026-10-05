@@ -9,3 +9,6 @@ testing*
 *.pyc
 null/
 co2footprint_*
+
+# Local working notebook for the resubmission (not part of the pipeline)
+lab_notebook/
