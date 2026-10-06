@@ -12,3 +12,5 @@ co2footprint_*
 
 # Local working notebook for the resubmission (not part of the pipeline)
 lab_notebook/
+.nf-test/
+.nf-test.log
