@@ -4,8 +4,8 @@ process CUTADAPT {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/cutadapt:4.6--py39hf95cd2a_1' :
-        'biocontainers/cutadapt:4.6--py39hf95cd2a_1' }"
+        'https://depot.galaxyproject.org/singularity/cutadapt:4.9--py310h7c593f9_2' :
+        'biocontainers/cutadapt:4.9--py310h7c593f9_2' }"
 
     input:
     tuple val(meta), path(reads)

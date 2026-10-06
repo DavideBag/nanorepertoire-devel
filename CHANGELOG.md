@@ -41,6 +41,7 @@ Second major release focused on repertoire analysis robustness, reporting refact
 - Updated module set and subworkflows to newer nf-core revisions.
 - Added `nf-co2footprint@1.0.0-beta` plugin.
 - Updated Plotly-related container setup for reporting components.
+- Aligned the container images with the conda environments: cutadapt 4.9, seqtk 1.4 and biopython 1.78 for every container engine, so that all profiles run the same tool versions.
 
 ### `Deprecated`
 
