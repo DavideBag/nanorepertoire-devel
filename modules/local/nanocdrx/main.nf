@@ -11,12 +11,13 @@ process NANOCDRX {
     tuple val(meta), path(translated)
 
     output:
-    tuple val("${meta.id}"), val("${meta.immunisation}"), val("${meta.boost}"), path("*.fasta"), emit: fasta
-    tuple val(meta), path("*.hist"), emit: hist
-    tuple val(meta), path("*.tsv"), emit: tsv
-    path '*.hist', emit: histonly
-    path '*.tsv', emit: tsvonly
+    tuple val("${meta.id}"), val("${meta.immunisation}"), val("${meta.boost}"), path("*_cdr3.fasta"), emit: fasta
+    tuple val(meta), path("*_cdr3.hist"), emit: hist
+    tuple val(meta), path("*_cdr3.tsv"), emit: tsv
+    path '*_cdr3.hist', emit: histonly
+    path '*_cdr3.tsv', emit: tsvonly
     val meta, emit: metaonly
+    tuple val(meta), path("*_cdr3_summary.tsv"), emit: summary
     path "versions.yml", emit: versions
 
     when:
@@ -33,7 +34,7 @@ process NANOCDRX {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        nanocdr-x: \$(predict_cdrs --version 2>&1 | sed 's/^.* //')
+        nanocdr-x: \$(python -c "import importlib.metadata as m; print(m.version('nanocdr-x'))")
     END_VERSIONS
     """
 }

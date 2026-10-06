@@ -14,6 +14,7 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
 
 - [FastQC](#fastqc) - Raw read QC
 - [Clustering summaries](#clustering-summaries) - Per-cluster tables produced from the CD-HIT output
+- [CDR3 annotation](#cdr3-annotation) - Per-sample CDR3 calls from nanoCDR-X, with the outcome of every cluster representative
 - [Aggregated statistics](#aggregated-statistics) - Tabular exports shared by the two reports
 - [Repertoire report](#repertoire-report) - Interactive HTML report and its QC tables
 - [MultiQC](#multiqc) - Aggregate report describing results and QC from the whole pipeline
@@ -52,6 +53,52 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
 | `Identity_n` | integer | Number of members contributing to `Identity`, i.e. `Count - 1`. `0` for singletons. |
 
 Because `Identity` is nullable, any downstream consumer must exclude `NA` rather than coerce it to a number: coercing to `0` places singletons at the origin of the identity histogram, and coercing to `100` asserts a perfect identity that was never measured. Values are bounded below by the clustering threshold (`--cdhit_identity`), since CD-HIT does not admit a sequence into a cluster below it.
+
+### CDR3 annotation
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `nanocdrx/`
+  - `*_cdr3.tsv`: one row per cluster representative, with the CDR3 called by nanoCDR-X and its status.
+  - `*_cdr3.fasta`: the unique CDR3 sequences, one record per first occurrence.
+  - `*_cdr3.hist`: number of unique CDR3s per length, from 0 to 50 residues.
+  - `*_cdr3_summary.tsv`: one row counting the representatives by outcome.
+
+</details>
+
+`bin/run_nanocdrx.py` runs nanoCDR-X on the cluster representatives written by CD-HIT, not on every sequence. Representatives shorter than 70 or longer than 150 residues (150 is the input length of the nanoCDR-X model), and representatives containing a residue outside the 20 standard amino acids, such as the `X` produced when a codon contains an undetermined base, are not sent to the model. They are kept in the outputs with their own status, so that every representative appears in `*_cdr3.tsv` exactly once. If nanoCDR-X fails, or does not return a result for every sequence it was given, the step stops with an error instead of producing partial output.
+
+`*_cdr3.tsv` has the following schema:
+
+| Column | Type | Description |
+| :--- | :--- | :--- |
+| `ID` | string | Identifier of the cluster representative, as in the CD-HIT output. |
+| `CDR3` | string or `NA` | CDR3 called by nanoCDR-X. `NA` when no CDR3 was called or the representative was not sent to the model. |
+| `sequence` | string | Amino-acid sequence of the representative. |
+| `unique` | string | Status of the representative, one of the values below. Despite its name, the column holds a status, not a flag. |
+
+| Status | Meaning |
+| :--- | :--- |
+| `unique` | CDR3 called; first occurrence of this CDR3 in the sample. Counted in `*_cdr3.hist` and written to `*_cdr3.fasta`. |
+| `non-unique` | CDR3 called; the same CDR3 was already seen in the sample. |
+| `cdr3-too-long` | CDR3 called but longer than 50 residues; kept out of the histogram. |
+| `no-cdr3` | Sent to the model; no CDR3 called. |
+| `excluded-length` | Not sent to the model: shorter than 70 or longer than 150 residues. |
+| `excluded-nonstandard` | Not sent to the model: contains a residue outside the 20 standard amino acids. |
+
+`*_cdr3_summary.tsv` holds one row per sample:
+
+| Column | Description |
+| :--- | :--- |
+| `sample` | Sample identifier. |
+| `input_sequences` | Cluster representatives read from the CD-HIT output. |
+| `excluded_length`, `excluded_nonstandard` | Representatives not sent to the model, by reason. |
+| `sent_to_model` | Representatives passed to nanoCDR-X: `input_sequences − excluded_length − excluded_nonstandard`. |
+| `with_cdr3`, `no_cdr3` | Outcome of the model: `sent_to_model = with_cdr3 + no_cdr3`. |
+| `unique`, `non_unique`, `cdr3_too_long` | Breakdown of `with_cdr3` by status. |
+
+The annotation coverage of the model is `with_cdr3 / sent_to_model`; the share of representatives that could be passed to the model at all is `sent_to_model / input_sequences`.
 
 ### Aggregated statistics
 

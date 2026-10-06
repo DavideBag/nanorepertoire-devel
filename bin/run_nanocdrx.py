@@ -1,141 +1,135 @@
 #!/usr/bin/env python3
-import sys
+"""Annotate CDR3s with nanoCDR-X (predict_cdrs) and write the per-sample CDR3 outputs.
+
+Every input sequence appears exactly once in <prefix>_cdr3.tsv, with one status:
+  unique                CDR3 called, first occurrence in the sample
+  non-unique            CDR3 called, already seen in the sample
+  cdr3-too-long         CDR3 called, longer than MAX_CDR3 residues (left out of the histogram)
+  no-cdr3               sent to the model, no CDR3 called
+  excluded-length       not sent to the model: length outside MIN_LENGTH-MAX_LENGTH
+  excluded-nonstandard  not sent to the model: contains a residue the model does not know (e.g. X)
+<prefix>_cdr3_summary.tsv counts the sequences in each group. The script exits
+with an error if predict_cdrs fails or does not return every sequence it was given.
+"""
+import argparse
 import csv
 import subprocess
-import argparse
-from collections import defaultdict
+import sys
+from collections import Counter
+
+STANDARD_AA = set("ACDEFGHIKLMNPQRSTVWY")
+MIN_LENGTH = 70
+MAX_LENGTH = 150  # input length of the nanoCDR-X model; longer sequences make predict_cdrs fail
+MAX_CDR3 = 50
+
+
+def read_sequences(path):
+    """Yield (identifier, sequence); headers may start with '>' or '@' (translate.py keeps the FASTQ header)."""
+    identifier, chunks = None, []
+    with open(path) as handle:
+        for line in handle:
+            line = line.strip()
+            if not line:
+                continue
+            if line[0] in ">@":
+                if identifier is not None:
+                    yield identifier, "".join(chunks).upper()
+                # first word only, without commas, which would break the CSV given to predict_cdrs
+                identifier, chunks = line[1:].split()[0].replace(",", "_"), []
+            else:
+                chunks.append(line)
+    if identifier is not None:
+        yield identifier, "".join(chunks).upper()
+
+
+def predict(sequences, extra_args):
+    """Run predict_cdrs once on all sequences and return {identifier: predicted CDR3}."""
+    with open("nanocdrx_input.csv", "w", newline="") as handle:
+        writer = csv.writer(handle)
+        writer.writerow(["identifier", "input"])
+        writer.writerows(sequences)
+    cmd = ["predict_cdrs", "-i", "nanocdrx_input.csv", "-o", "nanocdrx_output.csv"] + extra_args
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    if result.returncode != 0:
+        sys.stderr.write(result.stdout + result.stderr)
+        sys.exit(f"predict_cdrs failed (exit code {result.returncode}) on {len(sequences)} sequences")
+
+    with open("nanocdrx_output.csv", newline="") as handle:
+        calls = {row["identifier"]: row.get("predicted_cdr3") or "" for row in csv.DictReader(handle)}
+    missing = [identifier for identifier, _ in sequences if identifier not in calls]
+    if missing:
+        sys.exit(f"predict_cdrs returned no result for {len(missing)} of {len(sequences)} sequences, "
+                 f"e.g. {', '.join(missing[:5])}")
+    return calls
+
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", "--input", required=True)
     parser.add_argument("-p", "--prefix", required=True)
-    args, unknown = parser.parse_known_args()
+    args, extra_args = parser.parse_known_args()  # unrecognised arguments are passed on to predict_cdrs
 
-    input_file = args.input
-    prefix = args.prefix
+    rows = []  # [identifier, CDR3, sequence, status], in input order
+    for identifier, sequence in read_sequences(args.input):
+        if not MIN_LENGTH <= len(sequence) <= MAX_LENGTH:
+            status = "excluded-length"
+        elif not set(sequence) <= STANDARD_AA:
+            status = "excluded-nonstandard"
+        else:
+            status = None  # decided after the prediction
+        rows.append([identifier, "NA", sequence, status])
 
-    # 1. Convert Input to CSV for nanocdrx
-    sequences = []
-    with open(input_file, 'r') as f:
-        current_id = None
-        current_seq = []
-        for line in f:
-            line = line.strip()
-            if not line: continue
-            if line.startswith(">") or line.startswith("@"):
-                # Save the pending sequence if it exists
-                if current_id:
-                    full_seq = "".join(current_seq).upper()
-                    # Strict cleaning: keep only standard amino acids
-                    full_seq = "".join(c for c in full_seq if c in "ACDEFGHIKLMNPQRSTVWY")
-                    # Biological VHH length filter (70-160 AA)
-                    if 70 <= len(full_seq) <= 160:
-                        sequences.append({'identifier': current_id, 'input': full_seq})
-                # Start a new sequence
-                # Replace comma in identifier to avoid CSV issues, use only the first part as ID
-                current_id = str(line.lstrip(">@").split()[0]).replace(",", "_")
-                current_seq = []
-            else:
-                current_seq.append(str(line))
-        # Don't forget the last sequence in the file
-        if current_id:
-            full_seq = "".join(current_seq).upper()
-            full_seq = "".join(c for c in full_seq if c in "ACDEFGHIKLMNPQRSTVWY")
-            if 70 <= len(full_seq) <= 160:
-                sequences.append({'identifier': current_id, 'input': full_seq})
+    to_model = [(row[0], row[2]) for row in rows if row[3] is None]
+    calls = predict(to_model, extra_args) if to_model else {}
 
-    # 2. Run nanocdrx in Batches
-    # Processing in chunks (e.g., 500) reduces memory usage and prevents inhomogeneous array shape errors on large datasets.
-    batch_size = 500
-    all_results = []
-    
-    import os
-    seq_list = list(sequences)
-    for i in range(0, len(seq_list), batch_size):
-        batch = seq_list[i:i + batch_size]
-        batch_num = (i // batch_size) + 1
-        # print(f"Processing batch {batch_num} ({len(batch)} sequences)...")
-        
-        temp_csv_in = f"nanocdrx_input_b{batch_num}.csv"
-        temp_csv_out = f"nanocdrx_output_b{batch_num}.csv"
-        
-        with open(temp_csv_in, 'w', newline='') as f:
-            writer = csv.DictWriter(f, fieldnames=['identifier', 'input'])
-            writer.writeheader()
-            for item in batch:
-                writer.writerow(item)
-        
-        # Run predict_cdrs on this batch
-        cmd = ["predict_cdrs", "-i", temp_csv_in, "-o", temp_csv_out] + unknown
-        try:
-            subprocess.run(cmd, check=True)
-            # Read results back
-            with open(temp_csv_out, 'r') as f_out:
-                reader = csv.DictReader(f_out)
-                for row in reader:
-                    all_results.append(row)
-        except subprocess.CalledProcessError as e:
-            # print(f"Error in batch {batch_num}: {e}")
-            # If a batch fails, we skip it but continue with others to maximize output
+    seen = set()
+    lengths = Counter()
+    for row in rows:
+        if row[3] is not None:
             continue
-        finally:
-            # Cleanup temp files
-            if os.path.exists(temp_csv_in): os.remove(temp_csv_in)
-            if os.path.exists(temp_csv_out): os.remove(temp_csv_out)
+        cdr3 = calls[row[0]]
+        if cdr3 in ("", "nan"):
+            row[3] = "no-cdr3"
+            continue
+        row[1] = cdr3
+        if len(cdr3) > MAX_CDR3:
+            row[3] = "cdr3-too-long"
+        elif cdr3 in seen:
+            row[3] = "non-unique"
+        else:
+            row[3] = "unique"
+            seen.add(cdr3)
+            lengths[len(cdr3)] += 1
 
-    # 3. Process Final Output
-    fasta_out_name = f"{prefix}_cdr3.fasta"
-    tsv_out_name = f"{prefix}_cdr3.tsv"
-    hist_out_name = f"{prefix}_cdr3.hist"
+    with open(f"{args.prefix}_cdr3.tsv", "w") as tsv, open(f"{args.prefix}_cdr3.fasta", "w") as fasta:
+        tsv.write("ID\tCDR3\tsequence\tunique\n")
+        for identifier, cdr3, sequence, status in rows:
+            tsv.write(f"{identifier}\t{cdr3}\t{sequence}\t{status}\n")
+            if status == "unique":
+                fasta.write(f">{identifier}\n{cdr3}\n")
 
-    unique_cdr3s = set()
-    cdr3_lengths = {}
+    with open(f"{args.prefix}_cdr3.hist", "w") as hist:
+        hist.write("Size,Count\n")
+        for size in range(MAX_CDR3 + 1):
+            hist.write(f"{size},{lengths[size]}\n")
 
-    # Initialize histogram for 0-50 like getcdr3
-    for i in range(51):
-        cdr3_lengths[i] = 0
+    status = Counter(row[3] for row in rows)
+    summary = {
+        "sample": args.prefix,
+        "input_sequences": len(rows),
+        "excluded_length": status["excluded-length"],
+        "excluded_nonstandard": status["excluded-nonstandard"],
+        "sent_to_model": len(to_model),
+        "with_cdr3": status["unique"] + status["non-unique"] + status["cdr3-too-long"],
+        "no_cdr3": status["no-cdr3"],
+        "unique": status["unique"],
+        "non_unique": status["non-unique"],
+        "cdr3_too_long": status["cdr3-too-long"],
+    }
+    with open(f"{args.prefix}_cdr3_summary.tsv", "w") as handle:
+        handle.write("\t".join(summary) + "\n")
+        handle.write("\t".join(str(value) for value in summary.values()) + "\n")
 
-    with open(fasta_out_name, 'w') as f_fasta, \
-         open(tsv_out_name, 'w') as f_tsv:
-
-        # TSV Header
-        f_tsv.write("ID\tCDR3\tsequence\tunique\n")
-
-        for row in all_results:
-            identifier = row['identifier']
-            full_sequence = row['input']
-            cdr3 = row.get('predicted_cdr3', '')
-
-            status = ""
-            if not cdr3 or cdr3 == "nan":
-                status = "no-cdr3"
-                f_tsv.write(f"{identifier}\tNA\t{full_sequence}\t{status}\n")
-                continue
-
-            if len(cdr3) < 1 or len(cdr3) > 50:
-                status = "non-unique"
-                f_tsv.write(f"{identifier}\t{cdr3}\t{full_sequence}\t{status}\n")
-                continue
-
-            if cdr3 in unique_cdr3s:
-                status = "non-unique"
-                f_tsv.write(f"{identifier}\t{cdr3}\t{full_sequence}\t{status}\n")
-                continue
-
-            # Valid unique CDR3
-            unique_cdr3s.add(cdr3)
-            length = len(cdr3)
-            cdr3_lengths[length] = cdr3_lengths.get(length, 0) + 1
-
-            f_fasta.write(f">{identifier}\n{cdr3}\n")
-            f_tsv.write(f"{identifier}\t{cdr3}\t{full_sequence}\tunique\n")
-
-    # 4. Write Histogram
-    with open(hist_out_name, 'w') as f_hist:
-        f_hist.write("Size,Count\n")
-        for i in range(51):
-            count = cdr3_lengths.get(i, 0)
-            f_hist.write(f"{i},{count}\n")
 
 if __name__ == "__main__":
     main()

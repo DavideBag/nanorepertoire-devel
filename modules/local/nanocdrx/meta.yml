@@ -26,16 +26,38 @@ input:
 output:
   - fasta:
       type: file
-      description: FASTA file containing unique CDR3 sequences
-      pattern: "*.fasta"
+      description: FASTA file of the unique CDR3 sequences, one record per first occurrence
+      pattern: "*_cdr3.fasta"
   - hist:
       type: file
-      description: Histogram of CDR3 lengths
-      pattern: "*.hist"
+      description: Number of unique CDR3s per length, from 0 to 50 residues (CSV with columns Size, Count)
+      pattern: "*_cdr3.hist"
   - tsv:
       type: file
-      description: TSV file containing all sequences and their CDR3 status
-      pattern: "*.tsv"
+      description: |
+        One row per input sequence, with columns ID, CDR3, sequence and unique. The unique column holds the
+        status: unique, non-unique, cdr3-too-long, no-cdr3, excluded-length or excluded-nonstandard.
+        CDR3 is NA when no CDR3 was called or the sequence was not sent to the model.
+      pattern: "*_cdr3.tsv"
+  - histonly:
+      type: file
+      description: The same histogram as hist, without the meta map, to collect the files of all samples
+      pattern: "*_cdr3.hist"
+  - tsvonly:
+      type: file
+      description: The same table as tsv, without the meta map, to collect the files of all samples
+      pattern: "*_cdr3.tsv"
+  - metaonly:
+      type: map
+      description: |
+        The meta map of the sample, emitted on its own
+        e.g. [ id:'test', immunisation:'test_imm', boost:'test_boost' ]
+  - summary:
+      type: file
+      description: |
+        One-row table counting the input sequences by outcome: excluded by length, excluded for
+        non-standard residues, sent to the model, with and without a CDR3.
+      pattern: "*_cdr3_summary.tsv"
   - versions:
       type: file
       description: File containing software versions
