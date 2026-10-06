@@ -8,6 +8,8 @@ import multiprocessing
 from Bio.Seq import translate
 from multiprocessing import Pool
 
+COMPLEMENT = str.maketrans("ACGTN", "TGCAN")
+
 # Regex patterns for matching sequences
 startseq = r'(ATGGCTCAA|ATGGCTCAG|ATGGCCCAA|ATGGCCCAG|ATGGCACAA|ATGGCACAG|ATGGCGCAA|ATGGCGCAG|' \
     r'GTTCAATTA|GTTCAATTG|GTTCAACTT|GTTCAACTC|GTTCAACTA|GTTCAACTG|GTTCAGTTA|GTTCAGTTG|' \
@@ -114,29 +116,30 @@ def read_fastq(file_handle):
         qualityline = file_handle.readline()
         yield (headerline.rstrip(), sequenceline.rstrip(), plusline.rstrip(), qualityline.rstrip())
 
+def find_motifs(dna):
+    """Return the positions of the first start motif and of the first end motif in dna, -1 when absent."""
+    startseq_match = re.findall(startseq, dna)
+    endseq_match = re.findall(endseq, dna)
+    startbase = dna.find(startseq_match[0]) if startseq_match else -1
+    endbase = dna.find(endseq_match[0]) if endseq_match else -1
+    return startbase, endbase
+
 def process_read(read):
     """Processes a single read."""
     headerline, sequenceline, _, _ = read
-    result = {}
+    result = {'reversed': 0}
     dna = sequenceline.rstrip()
 
-    # Find start sequence
-    startseq_match = re.findall(startseq, dna)
-    if startseq_match:
-        startbase = dna.find(startseq_match[0])
-        result['foundstart'] = 1
-    else:
-        startbase = -1
-        result['foundstart'] = 0
-
-    # Find end sequence
-    endseq_match = re.findall(endseq, dna)
-    if endseq_match:
-        endbase = dna.find(endseq_match[0])
-        result['foundend'] = 1
-    else:
-        endbase = -1
-        result['foundend'] = 0
+    startbase, endbase = find_motifs(dna)
+    if startbase == -1 or endbase == -1:
+        # In non-directional libraries half of the merged reads hold the VHH on the other strand
+        reverse = dna.translate(COMPLEMENT)[::-1]
+        reverse_start, reverse_end = find_motifs(reverse)
+        if reverse_start != -1 and reverse_end != -1:
+            dna, startbase, endbase = reverse, reverse_start, reverse_end
+            result['reversed'] = 1
+    result['foundstart'] = int(startbase != -1)
+    result['foundend'] = int(endbase != -1)
 
     if startbase == -1 or endbase == -1:
         result['status'] = 'nostartnoend'
@@ -153,6 +156,9 @@ def process_read(read):
     translated = translate(targetregion)
     if '*' in translated:
         result['status'] = 'withstop'
+        return result
+    if 'X' in translated:
+        result['status'] = 'withundetermined'
         return result
 
     result['status'] = 'passed'
@@ -177,6 +183,8 @@ def main():
         foundend = 0
         notinframe = 0
         withstop = 0
+        withundetermined = 0
+        reversed_reads = 0
         nostartnoend = 0
 
         batch_size = 1000
@@ -211,12 +219,15 @@ def main():
                     nomultiplefile.write(result['nomultiple'])
                 elif result['status'] == 'withstop':
                     withstop += 1
+                elif result['status'] == 'withundetermined':
+                    withundetermined += 1
                 elif result['status'] == 'passed':
                     readspassing += 1
                     fileout.write(result['header'] + '\n')
                     fileout.write(result['translated'])
                 foundstart += result['foundstart']
                 foundend += result['foundend']
+                reversed_reads += result['reversed']
 
         # Write log file
         log.write("Completed reading reads:\n")
@@ -233,6 +244,10 @@ def main():
         log.write(f"{notinframe}\n")
         log.write("failed because there is a stop codon in the sequence\n")
         log.write(f"{withstop}\n")
+        log.write("failed because the translation contains an undetermined residue (X)\n")
+        log.write(f"{withundetermined}\n")
+        log.write("located on the reverse strand (reverse-complemented before translation)\n")
+        log.write(f"{reversed_reads}\n")
 
 if __name__ == "__main__":
     main()

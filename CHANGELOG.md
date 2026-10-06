@@ -28,6 +28,8 @@ Second major release focused on repertoire analysis robustness, reporting refact
 - Fixed `NANOCDRX` silently discarding whole 500-sequence batches: a single sequence longer than 150 residues, the input length of the nanoCDR-X model, made `predict_cdrs` fail on its batch, and the failure was ignored. The length filter is now 70-150 residues, and a failing or incomplete `predict_cdrs` run stops the step with an error.
 - Fixed CDR3s longer than 50 residues being labelled `non-unique`.
 - Fixed the nanoCDR-X version recorded in `versions.yml`, which was read from a `--version` option that `predict_cdrs` does not have.
+- Fixed `NANOTRANSLATE` discarding merged reads that hold the VHH on the reverse strand, as half of the reads of a non-directional library do: when the start or end motif is missing on the forward strand, the reverse complement is searched too. The translation log reports how many reads were reverse-complemented.
+- Fixed translations containing undetermined residues (`X`, from codons with an `N`) being kept: they are now discarded and counted in the translation log, like those with a stop codon. Reads with many `X` formed spurious singleton clusters.
 - Improved Docker compatibility on Apple Silicon and fixed ARM64 Wave container handling for report rendering.
 - Fixed resource-limit guard logic (`check_max`) and conda channel checks for Nextflow `25.10.4` + micromamba.
 - Addressed nf-core compliance and linting issues across templates/modules/subworkflows.
