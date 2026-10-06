@@ -40,8 +40,6 @@ process NANOREPERTOIRE_REPORT {
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         python: \$(python3 --version | sed 's/Python //')
-        pandas: \$(python3 -c "import pandas; print(pandas.__version__)")
-        plotly: \$(python3 -c "import plotly; print(plotly.__version__)")
     END_VERSIONS
     """
 }

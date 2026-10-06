@@ -28,7 +28,7 @@ process RENAME {
 
         cat <<-END_VERSIONS > versions.yml
         "${task.process}":
-            seqtk: \$(echo \$(seqtk 2>&1) | sed 's/^.*bVersion: //; s/ .*\$//')
+            seqtk: \$(echo \$(seqtk 2>&1) | sed 's/^.*Version: //; s/ .*\$//')
         END_VERSIONS
         """
     }

@@ -41,10 +41,12 @@ workflow NANOREPERTOIRE {
         input,
         ch_adapterfile
     )
+    ch_versions = ch_versions.mix(FASTQ_TO_FASTA.out.versions)
 
     FASTA_CLUSTERING(
         FASTQ_TO_FASTA.out.translated
     )
+    ch_versions = ch_versions.mix(FASTA_CLUSTERING.out.versions)
 
     REPERTOIRE_REPORT(
         file("$projectDir/assets/analysis_report.qmd", checkIfExists: true),

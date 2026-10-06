@@ -30,6 +30,7 @@ Second major release focused on repertoire analysis robustness, reporting refact
 - Fixed the nanoCDR-X version recorded in `versions.yml`, which was read from a `--version` option that `predict_cdrs` does not have.
 - Fixed `NANOTRANSLATE` discarding merged reads that hold the VHH on the reverse strand, as half of the reads of a non-directional library do: when the start or end motif is missing on the forward strand, the reverse complement is searched too. The translation log reports how many reads were reverse-complemented.
 - Fixed translations containing undetermined residues (`X`, from codons with an `N`) being kept: they are now discarded and counted in the translation log, like those with a stop codon. Reads with many `X` formed spurious singleton clusters.
+- Fixed the software versions report, which listed only FastQC and the reports: the versions of the `FASTQ_TO_FASTA` and `FASTA_CLUSTERING` steps were never collected. Also fixed the seqtk version recorded by `RENAME` and removed the pandas and plotly versions from `NANOREPERTOIRE_REPORT`, which does not use them.
 - Improved Docker compatibility on Apple Silicon and fixed ARM64 Wave container handling for report rendering.
 - Fixed resource-limit guard logic (`check_max`) and conda channel checks for Nextflow `25.10.4` + micromamba.
 - Addressed nf-core compliance and linting issues across templates/modules/subworkflows.
