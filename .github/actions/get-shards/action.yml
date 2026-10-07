@@ -34,7 +34,7 @@ runs:
           $(if [ -n "${{ inputs.tags }}" ]; then echo "--tag ${{ inputs.tags }}"; fi) \
           --dry-run \
           --ci \
-          --changed-since HEAD^) || {
+          $(if [ "${{ github.event_name }}" != "workflow_dispatch" ]; then echo "--changed-since HEAD^"; fi)) || {
             echo "nf-test command failed with exit code $?"
             echo "Full output: $nftest_output"
             exit 1
