@@ -3,46 +3,120 @@
         "content": [
             {
                 "0": [
-                    
+                    [
+                        "test1",
+                        "test_imm",
+                        "test_boost",
+                        "test1_cdr3.fasta:md5,dc5f470cf0ac7b636e083938ab0d4637"
+                    ]
                 ],
                 "1": [
-                    
+                    [
+                        {
+                            "id": "test1",
+                            "single_end": false,
+                            "immunisation": "test_imm",
+                            "boost": "test_boost"
+                        },
+                        "test1_cdr3.hist:md5,643ee0ddcc2be23cb0a854ed71417935"
+                    ]
                 ],
                 "2": [
-                    
+                    [
+                        {
+                            "id": "test1",
+                            "single_end": false,
+                            "immunisation": "test_imm",
+                            "boost": "test_boost"
+                        },
+                        "test1_cdr3.tsv:md5,9f090864459e259bdc26a000fe21c709"
+                    ]
                 ],
                 "3": [
-                    
+                    "test1_cdr3.hist:md5,643ee0ddcc2be23cb0a854ed71417935"
                 ],
                 "4": [
-                    
+                    "test1_cdr3.tsv:md5,9f090864459e259bdc26a000fe21c709"
                 ],
                 "5": [
-                    
+                    {
+                        "boost": "test_boost",
+                        "id": "test1",
+                        "immunisation": "test_imm",
+                        "single_end": false
+                    }
                 ],
                 "6": [
-                    
+                    [
+                        {
+                            "id": "test1",
+                            "single_end": false,
+                            "immunisation": "test_imm",
+                            "boost": "test_boost"
+                        },
+                        "test1_cdr3_summary.tsv:md5,e1a3aa5f7ab55b76062026848a9c352c"
+                    ]
+                ],
+                "7": [
+                    "versions.yml:md5,67e867d8f68edb2efd7aee8daf38723f"
                 ],
                 "fasta": [
-                    
+                    [
+                        "test1",
+                        "test_imm",
+                        "test_boost",
+                        "test1_cdr3.fasta:md5,dc5f470cf0ac7b636e083938ab0d4637"
+                    ]
                 ],
                 "hist": [
-                    
+                    [
+                        {
+                            "id": "test1",
+                            "single_end": false,
+                            "immunisation": "test_imm",
+                            "boost": "test_boost"
+                        },
+                        "test1_cdr3.hist:md5,643ee0ddcc2be23cb0a854ed71417935"
+                    ]
                 ],
                 "histonly": [
-                    
+                    "test1_cdr3.hist:md5,643ee0ddcc2be23cb0a854ed71417935"
                 ],
                 "metaonly": [
-                    
+                    {
+                        "boost": "test_boost",
+                        "id": "test1",
+                        "immunisation": "test_imm",
+                        "single_end": false
+                    }
+                ],
+                "summary": [
+                    [
+                        {
+                            "id": "test1",
+                            "single_end": false,
+                            "immunisation": "test_imm",
+                            "boost": "test_boost"
+                        },
+                        "test1_cdr3_summary.tsv:md5,e1a3aa5f7ab55b76062026848a9c352c"
+                    ]
                 ],
                 "tsv": [
-                    
+                    [
+                        {
+                            "id": "test1",
+                            "single_end": false,
+                            "immunisation": "test_imm",
+                            "boost": "test_boost"
+                        },
+                        "test1_cdr3.tsv:md5,9f090864459e259bdc26a000fe21c709"
+                    ]
                 ],
                 "tsvonly": [
-                    
+                    "test1_cdr3.tsv:md5,9f090864459e259bdc26a000fe21c709"
                 ],
                 "versions": [
-                    
+                    "versions.yml:md5,67e867d8f68edb2efd7aee8daf38723f"
                 ]
             }
         ],
@@ -50,6 +124,6 @@
             "nf-test": "0.9.2",
             "nextflow": "25.04.8"
         },
-        "timestamp": "2026-03-18T12:42:21.084236"
+        "timestamp": "2026-10-07T15:47:51.573115"
     }
 }
