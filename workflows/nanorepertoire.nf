@@ -51,9 +51,10 @@ workflow NANOREPERTOIRE {
     REPERTOIRE_REPORT(
         file("$projectDir/assets/analysis_report.qmd", checkIfExists: true),
         file("$projectDir/assets/loop_tree.qmd", checkIfExists: true),
-        FASTA_CLUSTERING.out.clusteread.collect(),
-        FASTA_CLUSTERING.out.cdrhistograms.collect(),
-        FASTA_CLUSTERING.out.cdrtsv.collect(),
+        // Sort by file name, so the aggregated tables list the samples in the same order on every run
+        FASTA_CLUSTERING.out.clusteread.collect(sort: { a, b -> a.name <=> b.name }),
+        FASTA_CLUSTERING.out.cdrhistograms.collect(sort: { a, b -> a.name <=> b.name }),
+        FASTA_CLUSTERING.out.cdrtsv.collect(sort: { a, b -> a.name <=> b.name }),
         input.map { it[0] }.collect()
     )
     ch_versions = ch_versions.mix(REPERTOIRE_REPORT.out.versions)
