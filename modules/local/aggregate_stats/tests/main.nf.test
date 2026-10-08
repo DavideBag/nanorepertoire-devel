@@ -39,7 +39,13 @@ nextflow_process {
         then {
             assertAll(
                 { assert workflow.success},
-                { assert snapshot(workflow.stdout).match()},
+                { assert snapshot(
+                    process.out.clustercounts,
+                    process.out.cdrcounts,
+                    process.out.cdrhists,
+                    process.out.clusterbig,
+                    process.out.fastaseq
+                ).match() },
                 { assert path(process.out.clustercounts[0]).exists() },
                 { assert path(process.out.cdrcounts[0]).exists() },
                 { assert path(process.out.cdrhists[0]).exists() },

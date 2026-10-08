@@ -2,13 +2,25 @@
     "reporting": {
         "content": [
             [
-                
+                "clustercounts.csv:md5,589c4db67d7765965847b93611dcc775"
+            ],
+            [
+                "cdrcounts.csv:md5,e6f4a0044da409941badcbb815c6ebb0"
+            ],
+            [
+                "cdrhists.csv:md5,6a642ec93852dce93e2fa17295f4aad6"
+            ],
+            [
+                "clusterbig.csv:md5,247e862c522bb1bc8106bd55a8dc6a6a"
+            ],
+            [
+                "fastaSeq.csv:md5,e8863a3dfda97d66ae8de7ce650816ad"
             ]
         ],
         "meta": {
-            "nf-test": "0.8.4",
-            "nextflow": "24.10.0"
+            "nf-test": "0.9.2",
+            "nextflow": "25.04.8"
         },
-        "timestamp": "2024-11-14T09:48:03.722276"
+        "timestamp": "2026-10-08T12:27:34.316922"
     }
 }
