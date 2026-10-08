@@ -48,6 +48,7 @@ Second major release focused on repertoire analysis robustness, reporting refact
 ### `Deprecated`
 
 - Deprecated legacy `getcdr3`-driven CDR3 extraction path in favor of `nanocdr-x`.
+- Removed the unused `GETCDR3` module and its test.
 
 ## 1.0.0 - 2025-10-17 Alpaca Lypse
 
