@@ -50,6 +50,7 @@ Second major release focused on repertoire analysis robustness, reporting refact
 
 - Deprecated legacy `getcdr3`-driven CDR3 extraction path in favor of `nanocdr-x`.
 - Removed the unused `GETCDR3` module and its test.
+- Removed `bin/getcdr3.py`, used only by the removed `GETCDR3` module.
 
 ## 1.0.0 - 2025-10-17 Alpaca Lypse
 
