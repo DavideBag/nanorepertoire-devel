@@ -3,20 +3,26 @@
 
 The workflow annotates the CDR3 with a deep-learning caller (nanoCDR-X). This
 script compares those calls, on the very same translated sequences, with the
-motif-based definition documented in ``assets/analysis_report.qmd`` and
-implemented in ``bin/getcdr3.py``:
+CDR3 as defined by IMGT: CDR3-IMGT, positions 105-117 of the IMGT unique
+numbering (Lefranc et al. 2003, Dev Comp Immunol 27:55-77), which is also the
+``cdr3`` field of the AIRR Community standard (Vander Heiden et al. 2018,
+Front Immunol 9:2206). CDR3-IMGT lies between two conserved anchors, both
+excluded: the second cysteine (2nd-CYS, position 104, the last residue of
+FR3-IMGT) and the J-region tryptophan (J-TRP, position 118, the first residue
+of FR4-IMGT). IMGT assigns these positions by alignment; here the two anchors
+are located with sequence motifs:
 
-* the CDR3 **starts** immediately after the cysteine of the framework-3 anchor
+* the CDR3 **starts** immediately after the cysteine of the framework-3 motif
   ``T.{2}Y.{1}C`` (the ``YYC`` motif);
-* the CDR3 **ends** immediately before the tryptophan of the framework-4 anchor
-  ``WG.G`` (the ``WGQ`` motif).
+* the CDR3 **ends** immediately before the tryptophan of the framework-4 motif
+  ``WG.G`` (the ``WGQG`` motif).
 
 Offsets are expressed in residues, relative to that reference:
 
 ``n_offset`` = start(nanoCDR-X) − start(reference)
     positive when the caller starts further into the loop, negative when it
     reaches back into framework 3.
-``n_offset`` = end(nanoCDR-X) − end(reference)
+``c_offset`` = end(nanoCDR-X) − end(reference)
     positive when the caller extends past the reference end, i.e. when
     framework-4 residues leak into the annotated CDR3.
 
@@ -33,15 +39,16 @@ import re
 import sys
 from collections import Counter, defaultdict
 
-# Framework-3 anchor, as used by bin/getcdr3.py. The CDR3 reference start is the
-# end of this match, i.e. the residue following the anchor cysteine.
+# Framework-3 anchor. The CDR3 reference start is the end of this match, i.e. the
+# residue following the anchor cysteine (2nd-CYS, IMGT position 104).
 FR3_ANCHOR = re.compile(r"T.{2}Y.{1}C")
-# Framework-4 anchor. The CDR3 reference end is the start of this match.
+# Framework-4 anchor. The CDR3 reference end is the start of this match, the
+# tryptophan J-TRP (IMGT position 118).
 FR4_ANCHOR = re.compile(r"WG.G")
 # Reads in which the conserved framework-4 tryptophan is substituted still carry
-# the C-terminal ``TVSS`` motif used by bin/getcdr3.py. The residue occupying the
-# tryptophan position is the sixth one before ``TVSS``, so the reference end is
-# one residue before that match, which is exactly what ``WG.G`` would have given.
+# the C-terminal ``TVSS`` motif. In the usual framework 4 (WGQGTQVTVSS) the
+# tryptophan position is the seventh residue before ``TVSS``, one residue before
+# the start of this match, which is exactly what ``WG.G`` would have given.
 FR4_FALLBACK = re.compile(r".{6}TVSS")
 
 NULL_VALUES = {"", "NA", "NaN", "nan", "None"}
@@ -52,8 +59,7 @@ def reference_boundaries(sequence):
 
     ``anchor`` records which framework-4 rule was used, ``WG.G`` or the
     ``TVSS`` fallback. ``None`` is returned when either anchor is missing or
-    they are out of order, the same failure mode ``bin/getcdr3.py`` reports as
-    ``no-cdr3``.
+    they are out of order.
     """
     fr3 = FR3_ANCHOR.search(sequence)
     if fr3 is None:

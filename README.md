@@ -39,7 +39,6 @@ Processes raw sequencing data to produce translated FASTA sequences:
 Clusters and analyses translated nanobody sequences:
 - **CD-HIT** – clustering of identical or highly similar sequences (configurable identity threshold)
 - **ReadCDHIT** – extraction and summarization of cluster statistics
-- **getCDR3** – extraction of CDR3 regions from translated nanobodies
 - **Nanocdr-x** – CDR3 extraction and analysis tool
 
 ### 3. `repertoire_report`
@@ -92,7 +91,7 @@ The pipeline produces:
     - `analysis_report.html`: Static scientific summary (R/Quarto).
     - `nanorepertoire_report.html`: Interactive dashboard (Python/Plotly).
     - `nanobodies_report.RData`: Serialized R object for downstream analysis.
-- **Annotation QC**: `cdr3_boundary_qc.tsv` and `cdr3_boundary_offsets.tsv`, comparing the called CDR3 boundaries with the motif-based definition.
+- **Annotation QC**: `cdr3_boundary_qc.tsv` and `cdr3_boundary_offsets.tsv`, comparing the called CDR3 boundaries with the IMGT definition of the CDR3 (CDR3-IMGT).
 
 The file-by-file description of the output directories, including the schema of every table, is in [`docs/output.md`](docs/output.md).
 
@@ -126,9 +125,9 @@ Five figures at the top of the report: the number of sequences for which the CDR
 
 **CDR3 Length Frequency Profile** (filled line chart). The same distribution as a frequency profile over lengths 0–45, from `cdrhists.csv`, with one curve per sample. Better than the violin for spotting multiple modes and for comparing the shoulders of two samples directly. Counts are of unique CDR3s, not of sequences, so a highly expanded clone contributes one observation, not thousands.
 
-**CDR3 annotation QC — summary table and CDR3 Boundary Offsets.** For every sequence with a called CDR3, `bin/cdr3_boundary_qc.py` re-derives the CDR3 with the motif-based definition documented in the Methods — start immediately after the cysteine of the framework-3 anchor `T..Y.C` (the `YYC` motif), end immediately before the tryptophan of the framework-4 anchor `WG.G` (the `WGQ` motif), falling back to the C-terminal `TVSS` motif in reads where that tryptophan is substituted — and compares it residue by residue with the boundaries called by nanoCDR-X. The table reports the number of comparable sequences, the exact agreement, and the median offset at each terminus; the CDR3 Boundary Offsets panel shows the full offset distribution per sample and terminus, on a logarithmic y axis so that rare disagreements stay visible next to the dominant zero-offset bar.
+**CDR3 annotation QC — summary table and CDR3 Boundary Offsets.** For every sequence with a called CDR3, `bin/cdr3_boundary_qc.py` re-derives the CDR3 as defined by IMGT (CDR3-IMGT, positions 105–117, between the conserved cysteine 104 and tryptophan 118, both excluded; Lefranc et al. 2003), locating the two anchors with sequence motifs — start immediately after the cysteine of the framework-3 anchor `T..Y.C` (the `YYC` motif), end immediately before the tryptophan of the framework-4 anchor `WG.G` (the `WGQ` motif), falling back to the C-terminal `TVSS` motif in reads where that tryptophan is substituted — and compares it residue by residue with the boundaries called by nanoCDR-X. The table reports the number of comparable sequences, the exact agreement, and the median offset at each terminus; the CDR3 Boundary Offsets panel shows the full offset distribution per sample and terminus, on a logarithmic y axis so that rare disagreements stay visible next to the dominant zero-offset bar.
 
-*How to read it.* An offset of 0 means the two definitions agree exactly. A systematically **positive C-terminal offset** means the called CDR3 extends into framework 4, which is rich in alanine, threonine and valine and would inflate those residues in the composition panels and lengthen the length distributions. A negative N-terminal offset means the call reaches back into framework 3. Sequences in which neither anchor can be located are not comparable and are counted separately: they are not evidence of agreement. The motif definition is itself a convention, not ground truth, so this panel measures *consistency between two annotations*, not accuracy against a curated reference.
+*How to read it.* An offset of 0 means the two definitions agree exactly. A systematically **positive C-terminal offset** means the called CDR3 extends into framework 4, which is rich in alanine, threonine and valine and would inflate those residues in the composition panels and lengthen the length distributions. A negative N-terminal offset means the call reaches back into framework 3. Sequences in which neither anchor can be located are not comparable and are counted separately: they are not evidence of agreement. The reference locates the IMGT anchors with sequence motifs rather than by alignment, so it is an approximation, not ground truth, and this panel measures *consistency between two annotations*, not accuracy against a curated reference.
 
 ### 3. CDR3 amino-acid composition
 

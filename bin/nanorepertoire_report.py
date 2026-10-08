@@ -895,8 +895,8 @@ html = f"""<!DOCTYPE html>
   </div>
   <div class="section-intro">
     Every length and composition figure above depends on where the CDR3 boundaries were placed, so the calls of the
-    deep-learning annotator are compared here against the motif-based definition documented in the Methods:
-    the loop starts immediately after the cysteine of the framework-3 anchor (<code>T..Y.C</code>, the <code>YYC</code>
+    deep-learning annotator are compared here against the IMGT definition of the CDR3 (CDR3-IMGT, Lefranc et al. 2003),
+    with its two anchors located by sequence motifs: the loop starts immediately after the cysteine of the framework-3 anchor (<code>T..Y.C</code>, the <code>YYC</code>
     motif) and ends immediately before the tryptophan of the framework-4 anchor (<code>WG.G</code>, the <code>WGQ</code>
     motif; reads in which that tryptophan is substituted are anchored on the C-terminal <code>TVSS</code> motif instead).
     An offset of 0 at both ends means the two definitions agree residue for residue. A systematically <em>positive</em>

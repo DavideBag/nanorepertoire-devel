@@ -158,9 +158,7 @@ kable(clustercounts) %>%
 
 ## CDR3 analysis
 
-We have used a Python script to collect the CDR3 sequences only from the full amino acid sequence, using the context of the CDR3 which begins with amino acids which commence after a YYC and terminates with the amino acids which precede a WGQ. We also compute the length distribution of these CDR3 sequences.
-
-Note that this approach is not robust to amino acid sequences which do not follow this pattern, or contain the motifs in other positions.
+The CDR3 of each cluster representative is annotated with nanoCDR-X (Bagordo et al. 2026). The reference definition is CDR3-IMGT, positions 105–117 of the IMGT unique numbering, between the conserved cysteine 104 and tryptophan 118, both excluded (Lefranc et al. 2003); the agreement of the nanoCDR-X calls with it is reported in the CDR3 annotation QC of the interactive report. We also compute the length distribution of these CDR3 sequences.
 
 ```{r }
 #| label: cdrhistogram
@@ -397,4 +395,4 @@ Clustering of the translated sequences is performed using the software CD-HIT. F
 
 ## Extracting the CDR3 sequences
 
-Using Biopython, and an in-house script originally written by T. Bleazard, we extract the CDR3 sequence from the translated protein sequence. The identification of CDR3 is crucial in this process: at the moment we extract a variable sequence between 3 amminoacids after the motif **T.{2}Y.{1}C** and the motif **.{6}TVSS**. We have chosen these motives based on multiple sequence alignments performed by Mitchel et al. in 2018 ( doi: 10.1002/prot.25497). We will consider more complex extraction algorithms in a future release. Note that - although the motifs we chose are the result of a multiple alignment and peer-reviewed work - this approach might not be robust to amino acid sequences which do not follow this pattern, or contain the motifs in other positions.
+The CDR3 is annotated on the cluster representatives with nanoCDR-X (Bagordo et al. 2026), a deep-learning model for nanobody CDR annotation. The reference definition of the CDR3 is CDR3-IMGT (Lefranc et al. 2003): the residues between the second conserved cysteine (IMGT position 104) and the J-region tryptophan (IMGT position 118), both excluded, which is also the `cdr3` field of the AIRR Community standard (Vander Heiden et al. 2018). The interactive report compares every nanoCDR-X call with this definition, locating the two anchors with sequence motifs.

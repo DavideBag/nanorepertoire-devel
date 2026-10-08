@@ -52,6 +52,16 @@
 
   > Plotly Technologies Inc. Collaborative data science. Montréal, QC, 2015. https://plot.ly.
 
+## CDR3 definition
+
+- [IMGT unique numbering](https://pubmed.ncbi.nlm.nih.gov/12477501/)
+
+  > Lefranc MP, Pommié C, Ruiz M, Giudicelli V, Foulquier E, Truong L, Thouvenin-Contet V, Lefranc G. IMGT unique numbering for immunoglobulin and T cell receptor variable domains and Ig superfamily V-like domains. Dev Comp Immunol. 2003 Jan;27(1):55-77. doi: 10.1016/s0145-305x(02)00039-3. PubMed PMID: 12477501.
+
+- [AIRR Community standard](https://pubmed.ncbi.nlm.nih.gov/30323809/)
+
+  > Vander Heiden JA, Marquez S, Marthandan N, Bukhari SAC, Busse CE, Corrie B, Hershberg U, Kleinstein SH, Matsen FA 4th, Ralph DK, Rosenfeld AM, Schramm CA; AIRR Community; Christley S, Laserson U. AIRR Community Standardized Representations for Annotated Immune Repertoires. Front Immunol. 2018;9:2206. doi: 10.3389/fimmu.2018.02206. PubMed PMID: 30323809; PubMed Central PMCID: PMC6173121.
+
 ## Software packaging/containerisation tools
 
 - [Anaconda](https://anaconda.com)

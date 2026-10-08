@@ -158,7 +158,7 @@ The diversity metrics table at the top of section 1 reports, for each sample, th
 | `Pct_expanded` | `100 · Clusters_of_5 / S` | Proportion of clusters with at least 5 members. |
 | `Pct_large` | `100 · Clusters_of_1000 / S` | Proportion of clusters with at least 1000 members. |
 
-`cdr3_boundary_qc.tsv` compares the CDR3 called by nanoCDR-X with the motif-based definition (start after the framework-3 `T..Y.C` anchor, end before the framework-4 `WG.G` anchor, falling back to the C-terminal `TVSS` motif when the conserved tryptophan is substituted). Offsets are in residues, relative to that reference: a positive C-terminal offset means the called CDR3 extends into framework 4. `Compared` counts the sequences for which both anchors could be located and the called CDR3 was found in the sequence; the three `Skipped_*` columns account for the remainder.
+`cdr3_boundary_qc.tsv` compares the CDR3 called by nanoCDR-X with the IMGT definition of the CDR3 (CDR3-IMGT, Lefranc et al. 2003), with its anchors located by sequence motifs (start after the framework-3 `T..Y.C` anchor, end before the framework-4 `WG.G` anchor, falling back to the C-terminal `TVSS` motif when the conserved tryptophan is substituted). Offsets are in residues, relative to that reference: a positive C-terminal offset means the called CDR3 extends into framework 4. `Compared` counts the sequences for which both anchors could be located and the called CDR3 was found in the sequence; the three `Skipped_*` columns account for the remainder.
 
 ### MultiQC
 
